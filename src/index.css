@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-wb-dark text-wb-cream font-dm-sans;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-cormorant font-bold;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-wb-gold text-wb-dark px-6 py-2 rounded font-dm-sans font-medium transition-all duration-300 hover:shadow-lg hover:shadow-wb-gold/30 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply border-2 border-wb-gold text-wb-gold px-6 py-2 rounded font-dm-sans font-medium transition-all duration-300 hover:bg-wb-gold hover:text-wb-dark;
+  }
+
+  .btn-ghost {
+    @apply text-wb-gold hover:text-wb-cream transition-colors duration-200;
+  }
+
+  .section-container {
+    @apply max-w-7xl mx-auto px-4 md:px-8 py-20;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-wb-gold to-wb-cream bg-clip-text text-transparent;
+  }
+
+  .gold-divider {
+    @apply h-0.5 bg-gradient-to-r from-transparent via-wb-gold to-transparent;
+  }
+
+  .card-base {
+    @apply bg-wb-dark-lighter border border-wb-gold/20 rounded-lg overflow-hidden transition-all duration-300 hover:border-wb-gold/50;
+  }
+
+  .toast-base {
+    @apply fixed bottom-4 right-4 bg-wb-gold text-wb-dark px-4 py-3 rounded shadow-lg font-dm-sans flex items-center gap-2 animate-slideIn z-50;
+  }
+}
+
+/* Utility classes */
+.grain {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><filter id="a"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="3" result="noise" seed="1"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G"/></filter><rect width="100" height="100" fill="%230f0e0c" filter="url(%23a)" opacity=".03"/></svg>');
+  background-repeat: repeat;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
