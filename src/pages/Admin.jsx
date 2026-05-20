@@ -12,6 +12,7 @@ import {
   ChevronDown,
   Settings,
   AlertCircle,
+  X,
 } from "lucide-react";
 
 const isMockMode =
@@ -19,6 +20,14 @@ const isMockMode =
   import.meta.env.VITE_SUPABASE_URL.includes("your-project-id");
 const CATEGORIES = ["Bread", "Cakes", "Pastries", "Drinks", "Other"];
 const ADMIN_KEY = "wb_admin";
+
+// ─── Shared Styles ────────────────────────────────────────────────────────────
+
+const cardStyle = "bg-[#1a1917] border border-[rgba(201,168,76,0.25)] shadow-[0_4px_24px_rgba(0,0,0,0.4)] rounded-lg";
+const inputStyle = "w-full bg-wb-dark border border-[rgba(201,168,76,0.25)] text-wb-cream px-3 py-2.5 rounded focus:outline-none focus:shadow-[0_0_0_2px_rgba(201,168,76,0.2)] transition-all font-dm-sans";
+const btnSolid = "bg-wb-gold text-wb-dark font-dm-sans font-bold py-2 px-4 rounded hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed";
+const btnOutlineGold = "border border-wb-gold text-wb-gold font-dm-sans font-bold py-1.5 px-3 rounded hover:bg-wb-gold hover:text-wb-dark transition-all text-sm";
+const btnOutlineRed = "border border-[#ef5350] text-[#ef5350] font-dm-sans font-bold py-1.5 px-3 rounded hover:bg-[#ef5350] hover:text-wb-dark transition-all text-sm";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -30,25 +39,25 @@ function StatusBadge({ status }) {
   const map = {
     received: {
       label: "Received",
-      classes: "bg-yellow-500/20 text-yellow-700 border-yellow-400/50",
+      classes: "bg-wb-dark text-wb-cream border-[rgba(201,168,76,0.2)]",
     },
     preparing: {
       label: "Preparing",
-      classes: "bg-blue-500/20 text-blue-700 border-blue-400/50",
+      classes: "bg-wb-dark text-wb-cream border-[rgba(201,168,76,0.2)]",
     },
     ready: {
       label: "Ready",
-      classes: "bg-purple-500/20 text-purple-700 border-purple-400/50",
+      classes: "bg-wb-dark text-wb-cream border-[rgba(201,168,76,0.2)]",
     },
     delivered: {
       label: "Delivered",
-      classes: "bg-green-500/20 text-green-700 border-green-400/50",
+      classes: "bg-[#4caf50]/20 text-[#4caf50] border-[#4caf50]/50",
     },
   };
   const s = map[status] || map.received;
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-lato text-xs uppercase tracking-wide border ${s.classes}`}
+      className={`inline-flex items-center px-2 py-0.5 rounded text-xs uppercase tracking-widest border font-dm-sans ${s.classes}`}
     >
       {s.label}
     </span>
@@ -58,7 +67,7 @@ function StatusBadge({ status }) {
 function Spinner() {
   return (
     <div className="flex items-center justify-center py-16">
-      <div className="spinner-terra" />
+      <div className="w-8 h-8 border-2 border-wb-gold/30 border-t-wb-gold rounded-full animate-spin" />
     </div>
   );
 }
@@ -67,15 +76,20 @@ function Spinner() {
 
 export function Admin() {
   const [isUnlocked, setIsUnlocked] = useState(false);
-  const [activeTab, setActiveTab] = useState("products");
+  const [activeTab, setActiveTab] = useState("orders"); // Orders as default per redesign typically
 
   // Products state
   const [products, setProducts] = useState([]);
   const [productsLoading, setProductsLoading] = useState(false);
+  
+  // Product Modal State
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     price: "",
     category: "Bread",
+    is_available: true,
+    is_featured: false,
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -144,7 +158,6 @@ export function Admin() {
     setFormLoading(true);
     try {
       if (isMockMode) {
-        // Base64 encode image for localStorage
         const reader = new FileReader();
         reader.onload = () => {
           const base64Url = reader.result;
@@ -154,8 +167,8 @@ export function Admin() {
             price: Number(formData.price),
             category: formData.category,
             image_url: base64Url,
-            is_available: true,
-            is_featured: false,
+            is_available: formData.is_available,
+            is_featured: formData.is_featured,
             created_at: new Date().toISOString(),
           };
           const stored = localStorage.getItem("wb_products");
@@ -163,14 +176,13 @@ export function Admin() {
           const updated = [newProduct, ...existing];
           localStorage.setItem("wb_products", JSON.stringify(updated));
           setProducts(updated);
-          resetForm();
-          setFormLoading(false);
+          closeModal();
         };
         reader.readAsDataURL(imageFile);
-        return; // early return; setFormLoading(false) is in the reader callback
+        return;
       }
 
-      // Live mode — upload image via admin client (service role bypasses RLS)
+      // Live mode
       const adminClient = getSupabaseAdmin();
       const ext = imageFile.name.split(".").pop();
       const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
@@ -190,13 +202,13 @@ export function Admin() {
         price: Number(formData.price),
         category: formData.category,
         image_url: imageUrl,
-        is_available: true,
-        is_featured: false,
+        is_available: formData.is_available,
+        is_featured: formData.is_featured,
       });
       if (insertError) throw insertError;
 
       await fetchProducts();
-      resetForm();
+      closeModal();
     } catch (err) {
       console.error("Error adding product:", err);
       setFormError(err.message || "Failed to add product. Please try again.");
@@ -204,12 +216,13 @@ export function Admin() {
     }
   }
 
-  function resetForm() {
-    setFormData({ name: "", price: "", category: "Bread" });
+  function closeModal() {
+    setIsProductModalOpen(false);
+    setFormData({ name: "", price: "", category: "Bread", is_available: true, is_featured: false });
     setImageFile(null);
     setImagePreview(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
     setFormLoading(false);
+    setFormError("");
   }
 
   function handleImageChange(e) {
@@ -236,25 +249,17 @@ export function Admin() {
         return;
       }
 
-      // Live mode
       const adminClient = getSupabaseAdmin();
-
-      // Try to delete the image from storage (best-effort)
       if (product.image_url) {
         try {
           const parts = product.image_url.split("/product-images/");
           if (parts.length === 2) {
             await adminClient.storage.from("product-images").remove([parts[1]]);
           }
-        } catch (_) {
-          /* ignore storage errors */
-        }
+        } catch (_) {}
       }
 
-      const { error } = await adminClient
-        .from("products")
-        .delete()
-        .eq("id", product.id);
+      const { error } = await adminClient.from("products").delete().eq("id", product.id);
       if (error) throw error;
       setProducts((prev) => prev.filter((p) => p.id !== product.id));
     } catch (err) {
@@ -285,41 +290,35 @@ export function Admin() {
     }
   }
 
-  // ── Orders: mark delivered ────────────────────────────────────────────────────
-  async function handleMarkDelivered(order) {
-    if (order.status === "delivered") return; // already delivered, no-op
+  // ── Orders: update status ────────────────────────────────────────────────────
+  async function handleUpdateOrderStatus(order, newStatus) {
+    if (order.status === newStatus) return;
 
     try {
       if (isMockMode) {
         const stored = localStorage.getItem("wb_orders");
         const existing = stored ? JSON.parse(stored) : [];
         const updated = existing.map((o) =>
-          o.id === order.id ? { ...o, status: "delivered" } : o,
+          o.id === order.id ? { ...o, status: newStatus } : o,
         );
         localStorage.setItem("wb_orders", JSON.stringify(updated));
         setOrders(updated);
         return;
       }
 
-      // Optimistic UI
       setOrders((prev) =>
-        prev.map((o) =>
-          o.id === order.id ? { ...o, status: "delivered" } : o,
-        ),
+        prev.map((o) => (o.id === order.id ? { ...o, status: newStatus } : o)),
       );
 
       const { error } = await supabase
         .from("orders")
-        .update({ status: "delivered" })
+        .update({ status: newStatus })
         .eq("id", order.id);
       if (error) throw error;
     } catch (err) {
-      console.error("Error marking order delivered:", err);
-      // Revert optimistic update
+      console.error("Error updating order:", err);
       setOrders((prev) =>
-        prev.map((o) =>
-          o.id === order.id ? { ...o, status: order.status } : o,
-        ),
+        prev.map((o) => (o.id === order.id ? { ...o, status: order.status } : o)),
       );
       alert("Failed to update order: " + (err.message || "Unknown error"));
     }
@@ -337,435 +336,155 @@ export function Admin() {
 
   // ── Render: unlocked ──────────────────────────────────────────────────────────
   return (
-    <div className="pt-20 pb-12 min-h-screen bg-wb-bg">
-      <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6">
-        {/* ── Header ── */}
-        <div className="flex items-center justify-between flex-wrap gap-4 mb-8">
-          <div>
-            <h1 className="font-playfair italic text-3xl sm:text-4xl text-wb-brown">
-              Admin Dashboard
-            </h1>
-          </div>
+    <div className="pt-20 pb-12 min-h-screen bg-wb-dark font-dm-sans">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        
+        {/* ── Top Bar ── */}
+        <div className="flex items-center justify-between mb-8 pb-4 border-b border-[rgba(201,168,76,0.2)]">
+          <h1 className="font-cormorant italic text-2xl sm:text-3xl text-wb-gold">
+            WONDER BAKERY <span className="font-dm-sans not-italic text-lg text-wb-cream opacity-80 ml-2">— Admin</span>
+          </h1>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 rounded border border-wb-border text-wb-muted hover:text-wb-terra hover:border-wb-terra transition-colors text-sm font-lato"
+            className="flex items-center gap-2 px-3 py-1.5 rounded border border-[rgba(201,168,76,0.4)] text-wb-cream hover:text-wb-dark hover:bg-wb-gold transition-colors text-sm"
           >
             <LogOut size={16} />
-            Logout
+            <span className="hidden sm:inline">Logout</span>
           </button>
         </div>
 
         {/* ── Tabs ── */}
-        <div className="flex gap-1 mb-8 bg-wb-cream border border-wb-border rounded p-1 w-full sm:w-fit overflow-x-auto">
+        <div className="flex gap-6 mb-8 border-b border-[rgba(201,168,76,0.1)]">
           {[
-            { id: "products", label: "Products", icon: Package },
-            { id: "orders", label: "Orders", icon: ShoppingBag },
-            { id: "settings", label: "Settings", icon: Settings },
-          ].map(({ id, label, icon: Icon }) => (
+            { id: "orders", label: "Orders" },
+            { id: "products", label: "Products" },
+            { id: "settings", label: "Settings" },
+          ].map(({ id, label }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-md transition-all ${
+              className={`pb-3 text-sm uppercase tracking-widest font-bold transition-all border-b-2 ${
                 activeTab === id
-                  ? "bg-wb-terra text-wb-cream font-lato font-bold text-xs uppercase tracking-wider"
-                  : "text-wb-muted hover:text-wb-brown font-lato text-xs uppercase tracking-wider"
+                  ? "text-wb-gold border-wb-gold"
+                  : "text-wb-cream border-transparent hover:text-wb-gold/70"
               }`}
             >
-              <Icon size={16} />
               {label}
             </button>
           ))}
         </div>
 
-        {/* ════════════════════════════════════════════ TAB: PRODUCTS ══ */}
-        {activeTab === "products" && (
-          <div>
-            {/* ── Add Product Form ── */}
-            <div className="card-base mb-8">
-              <h2 className="font-playfair italic text-2xl text-wb-brown mb-6 flex items-center gap-2">
-                <Upload size={20} />
-                Add New Product
-              </h2>
-
-              <form onSubmit={handleAddProduct} className="space-y-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  {/* Name */}
-                  <div>
-                    <label className="block text-wb-muted text-xs uppercase tracking-wide font-lato mb-1.5">
-                      Product Name
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Sourdough Loaf"
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData((p) => ({ ...p, name: e.target.value }))
-                      }
-                      className="w-full bg-wb-bg border border-wb-border rounded px-3 py-2.5 text-wb-brown font-lato text-sm placeholder-wb-muted/50 focus:border-wb-terra focus:outline-none transition-colors"
-                    />
-                  </div>
-
-                  {/* Price */}
-                  <div>
-                    <label className="block text-wb-muted text-xs uppercase tracking-wide font-lato mb-1.5">
-                      Price in Le
-                    </label>
-                    <input
-                      type="number"
-                      placeholder="e.g. 15000"
-                      min="0"
-                      value={formData.price}
-                      onChange={(e) =>
-                        setFormData((p) => ({ ...p, price: e.target.value }))
-                      }
-                      className="w-full bg-wb-bg border border-wb-border rounded px-3 py-2.5 text-wb-brown font-lato text-sm placeholder-wb-muted/50 focus:border-wb-terra focus:outline-none transition-colors"
-                    />
-                  </div>
-
-                  {/* Category */}
-                  <div>
-                    <label className="block text-wb-muted text-xs uppercase tracking-wide font-lato mb-1.5">
-                      Category
-                    </label>
-                    <div className="relative">
-                      <select
-                        value={formData.category}
-                        onChange={(e) =>
-                          setFormData((p) => ({
-                            ...p,
-                            category: e.target.value,
-                          }))
-                        }
-                        className="w-full appearance-none bg-wb-bg border border-wb-border rounded px-3 py-2.5 text-wb-brown font-lato text-sm focus:border-wb-terra focus:outline-none transition-colors"
-                      >
-                        {CATEGORIES.map((c) => (
-                          <option key={c} value={c}>
-                            {c}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown
-                        size={16}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-wb-muted/60 pointer-events-none"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Image */}
-                  <div>
-                    <label className="block text-wb-muted text-xs uppercase tracking-wide font-lato mb-1.5">
-                      Product Image
-                    </label>
-                    <div
-                      className="relative w-full border-2 border-dashed border-wb-border rounded overflow-hidden cursor-pointer hover:border-wb-terra transition-colors"
-                      style={{ height: "44px" }}
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="hidden"
-                      />
-                      {imagePreview ? (
-                        <div className="flex items-center gap-3 px-3 h-full">
-                          <img
-                            src={imagePreview}
-                            alt="preview"
-                            className="h-8 w-8 object-cover rounded"
-                          />
-                          <span className="text-wb-muted text-sm truncate">
-                            {imageFile?.name}
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2 px-3 h-full text-wb-muted text-sm">
-                          <Upload size={15} />
-                          Click to choose image
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {formError && (
-                  <p className="text-red-600 text-sm font-lato">{formError}</p>
-                )}
-
-                <div className="flex items-center gap-4">
-                  <button
-                    type="submit"
-                    disabled={formLoading}
-                    className="btn-primary flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
-                  >
-                    {formLoading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-wb-dark/30 border-t-wb-dark rounded-full animate-spin" />
-                        Saving…
-                      </>
-                    ) : (
-                      <>
-                        <Upload size={16} />
-                        Add Product
-                      </>
-                    )}
-                  </button>
-                  {(formData.name || formData.price || imageFile) &&
-                    !formLoading && (
-                      <button
-                        type="button"
-                        onClick={resetForm}
-                        className="text-wb-muted hover:text-wb-terra transition-colors text-sm font-lato"
-                      >
-                        Clear
-                      </button>
-                    )}
-                </div>
-              </form>
-            </div>
-
-            {/* ── Products List ── */}
-            <h2 className="font-playfair italic text-2xl text-wb-brown mb-4">
-              Products ({products.length})
-            </h2>
-
-            {productsLoading ? (
-              <Spinner />
-            ) : products.length === 0 ? (
-              <div className="card-base text-center py-16">
-                <Package size={48} className="mx-auto text-wb-terra/30 mb-4" />
-                <p className="font-lato text-wb-muted">
-                  No products yet. Add your first product above.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {products.map((product) => (
-                  <div
-                    key={product.id}
-                    className="bg-wb-cream border border-wb-border rounded overflow-hidden hover:shadow-warm transition-all group"
-                  >
-                    {/* Image */}
-                    <div className="aspect-square bg-wb-bg overflow-hidden">
-                      {product.image_url ? (
-                        <img
-                          src={product.image_url}
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Package size={32} className="text-wb-terra/20" />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Info */}
-                    <div className="p-3">
-                      <p className="font-playfair text-wb-brown text-sm font-medium truncate">
-                        {product.name}
-                      </p>
-                      <p className="font-lato font-bold text-wb-terra text-sm mt-0.5">
-                        {formatPrice(product.price)}
-                      </p>
-                      <p className="font-lato text-[10px] uppercase tracking-widest text-wb-terra mt-0.5">
-                        {product.category}
-                      </p>
-
-                      <button
-                        onClick={() => handleDeleteProduct(product)}
-                        className="mt-3 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 text-red-500 hover:text-red-700 text-xs transition-colors"
-                      >
-                        <Trash2 size={12} />
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
         {/* ════════════════════════════════════════════ TAB: ORDERS ══ */}
         {activeTab === "orders" && (
           <div>
-            {/* ── Stats bar ── */}
-            <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-8">
+            {/* Stats Row */}
+            <div className="grid grid-cols-3 gap-4 mb-8">
               {[
-                {
-                  label: "Total Orders",
-                  value: totalOrders,
-                  color: "text-wb-terra",
-                },
-                {
-                  label: "Delivered",
-                  value: deliveredCount,
-                  color: "text-green-700",
-                },
-                {
-                  label: "Pending",
-                  value: pendingCount,
-                  color: "text-wb-brown",
-                },
-              ].map(({ label, value, color }) => (
-                <div
-                  key={label}
-                  className="bg-wb-cream border border-wb-border rounded p-4 text-center"
-                >
-                  <p className="font-lato text-xs uppercase tracking-wide text-wb-muted mb-1">
-                    {label}
-                  </p>
-                  <p className={`font-playfair text-2xl ${color}`}>{value}</p>
+                { label: "Total Orders", value: totalOrders },
+                { label: "Pending", value: pendingCount },
+                { label: "Delivered", value: deliveredCount },
+              ].map(({ label, value }) => (
+                <div key={label} className={`${cardStyle} p-6 flex flex-col items-center justify-center text-center`}>
+                  <p className="text-4xl font-cormorant text-wb-gold mb-1">{value}</p>
+                  <p className="text-xs uppercase tracking-widest text-wb-cream opacity-70">{label}</p>
                 </div>
               ))}
             </div>
 
-            {/* ── Orders list ── */}
+            {/* Orders List */}
             {ordersLoading ? (
               <Spinner />
             ) : orders.length === 0 ? (
-              <div className="card-base text-center py-16">
-                <ShoppingBag
-                  size={48}
-                  className="mx-auto text-wb-terra/30 mb-4"
-                />
-                <p className="font-lato text-wb-muted">No orders yet.</p>
+              <div className="py-20 text-center">
+                <p className="font-cormorant italic text-wb-cream text-2xl opacity-60">
+                  No orders yet.
+                </p>
               </div>
             ) : (
               <div className="space-y-4">
                 {orders.map((order) => {
-                  const isDelivered = order.status === "delivered";
                   const items = Array.isArray(order.items) ? order.items : [];
                   const dateStr = order.created_at
                     ? new Date(order.created_at).toLocaleString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
+                        month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
                       })
                     : "—";
 
                   return (
-                    <div
-                      key={order.id}
-                      className={`bg-wb-cream border border-wb-border rounded-lg p-4 sm:p-5 transition-all ${isDelivered ? "opacity-60" : ""}`}
-                    >
-                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                        {/* ── Left: order info ── */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex flex-wrap items-center gap-2 mb-2">
-                            {isDelivered && (
-                              <CheckCircle
-                                size={16}
-                                className="text-green-700 shrink-0"
-                              />
-                            )}
-                            <span className="font-lato text-xs text-wb-muted font-mono">
-                              #
-                              {typeof order.id === "string"
-                                ? order.id.slice(0, 8).toUpperCase()
-                                : order.id}
-                            </span>
-                            <StatusBadge status={order.status} />
-                            <span className="font-lato text-wb-muted/60 text-xs flex items-center gap-1">
-                              <Clock size={11} />
-                              {dateStr}
-                            </span>
-                          </div>
+                    <div key={order.id} className={`${cardStyle} p-5`}>
+                      {/* Top Row */}
+                      <div className="flex justify-between items-center border-b border-[rgba(201,168,76,0.1)] pb-3 mb-4">
+                        <div className="flex items-center gap-3">
+                          <span className="font-cormorant text-xl text-wb-gold font-bold">
+                            #{typeof order.id === "string" ? order.id.slice(0, 8).toUpperCase() : order.id}
+                          </span>
+                          <StatusBadge status={order.status} />
+                        </div>
+                        <span className="text-xs text-wb-cream opacity-60 flex items-center gap-1.5">
+                          <Clock size={12} /> {dateStr}
+                        </span>
+                      </div>
 
-                          {/* Customer */}
-                          <div className="mb-2">
-                            <span className="font-playfair text-wb-brown font-medium">
-                              {order.customer_name || "Unknown"}
-                            </span>
-                            {order.customer_phone && (
-                              <span className="font-lato text-wb-muted text-sm ml-2">
-                                {order.customer_phone}
-                              </span>
+                      {/* Content Row */}
+                      <div className="flex flex-col md:flex-row justify-between gap-6">
+                        {/* Info */}
+                        <div className="flex-1 space-y-3">
+                          <div>
+                            <p className="text-wb-cream font-bold">{order.customer_name || "Unknown Customer"}</p>
+                            <p className="text-wb-cream/70 text-sm">{order.customer_phone}</p>
+                          </div>
+                          
+                          <div className="text-sm text-wb-cream/80 space-y-1">
+                            <p>
+                              <span className="text-wb-gold/70 mr-1 uppercase text-xs tracking-wider">Type:</span> 
+                              {order.delivery_type === "delivery" ? "Delivery" : "Pickup"}
+                            </p>
+                            {(order.delivery_address || order.customer_delivery_address) && (
+                              <p>
+                                <span className="text-wb-gold/70 mr-1 uppercase text-xs tracking-wider">Address:</span> 
+                                {order.delivery_address || order.customer_delivery_address}
+                              </p>
+                            )}
+                            {order.preferred_delivery_date && (
+                              <p>
+                                <span className="text-wb-gold/70 mr-1 uppercase text-xs tracking-wider">Time:</span> 
+                                {order.preferred_delivery_date} {order.preferred_delivery_time}
+                              </p>
                             )}
                           </div>
 
                           {/* Items */}
-                          {items.length > 0 && (
-                            <div className="mb-2 flex flex-wrap gap-1.5">
+                          <div className="pt-2">
+                            <p className="text-xs uppercase tracking-widest text-wb-gold/70 mb-2">Order Items</p>
+                            <div className="flex flex-wrap gap-2">
                               {items.map((item, i) => (
-                                <span
-                                  key={i}
-                                  className="inline-block bg-wb-bg border border-wb-border px-2 py-0.5 rounded font-lato text-xs text-wb-muted"
-                                >
+                                <span key={i} className="bg-wb-dark border border-[rgba(201,168,76,0.2)] px-2 py-1 rounded text-xs text-wb-cream">
                                   {item.quantity}× {item.name}
                                 </span>
                               ))}
                             </div>
-                          )}
-
-                          {/* Delivery info */}
-                          {order.delivery_type && (
-                            <p className="font-lato text-wb-muted text-xs capitalize">
-                              {order.delivery_type === "delivery"
-                                ? "Delivery"
-                                : "Pickup"}
-                            </p>
-                          )}
-                          {order.delivery_address && (
-                            <p className="font-lato text-wb-muted text-xs">
-                              {order.delivery_address}
-                            </p>
-                          )}
-                          {order.customer_delivery_address && (
-                            <p className="font-lato text-wb-muted text-xs">
-                              <span className="text-wb-muted/60 font-lato">
-                                Address:{" "}
-                              </span>
-                              {order.customer_delivery_address}
-                            </p>
-                          )}
-                          {order.preferred_delivery_date && (
-                            <p className="font-lato text-wb-muted text-xs">
-                              <span className="text-wb-muted/60 font-lato">
-                                Date:{" "}
-                              </span>
-                              {order.preferred_delivery_date}
-                            </p>
-                          )}
-                          {order.preferred_delivery_time && (
-                            <p className="font-lato text-wb-muted text-xs">
-                              <span className="text-wb-muted/60 font-lato">
-                                Time:{" "}
-                              </span>
-                              {order.preferred_delivery_time}
-                            </p>
-                          )}
+                          </div>
                         </div>
 
-                        {/* ── Right: price + action ── */}
-                        <div className="flex flex-row sm:flex-col items-center sm:items-end gap-3 shrink-0">
-                          <p className="font-playfair text-wb-terra text-xl font-medium">
+                        {/* Actions */}
+                        <div className="flex flex-col items-end justify-between min-w-[150px] border-t md:border-t-0 md:border-l border-[rgba(201,168,76,0.1)] pt-4 md:pt-0 md:pl-6">
+                          <p className="font-bold text-wb-gold text-2xl mb-4">
                             {formatPrice(order.total_amount || 0)}
                           </p>
-
-                          {/* Mark as Delivered toggle */}
-                          <label
-                            className={`flex items-center gap-2 cursor-pointer select-none ${
-                              isDelivered ? "cursor-default" : "cursor-pointer"
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isDelivered}
-                              disabled={isDelivered}
-                              onChange={() => handleMarkDelivered(order)}
-                              className="w-4 h-4 accent-green-700 cursor-pointer disabled:cursor-default"
-                            />
-                            <span
-                              className={`text-xs font-lato ${isDelivered ? "text-green-700" : "text-wb-muted"}`}
+                          
+                          <div className="w-full relative">
+                            <select
+                              value={order.status}
+                              onChange={(e) => handleUpdateOrderStatus(order, e.target.value)}
+                              className="w-full appearance-none bg-wb-dark border border-[rgba(201,168,76,0.4)] text-wb-cream text-sm px-3 py-2 rounded focus:outline-none focus:border-wb-gold cursor-pointer"
                             >
-                              {isDelivered ? "Delivered ✓" : "Mark Delivered"}
-                            </span>
-                          </label>
+                              <option value="received">Received</option>
+                              <option value="preparing">Preparing</option>
+                              <option value="ready">Ready</option>
+                              <option value="delivered">Delivered</option>
+                            </select>
+                            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-wb-gold pointer-events-none" />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -776,17 +495,151 @@ export function Admin() {
           </div>
         )}
 
+        {/* ════════════════════════════════════════════ TAB: PRODUCTS ══ */}
+        {activeTab === "products" && (
+          <div>
+            <div className="flex justify-end mb-6">
+              <button onClick={() => setIsProductModalOpen(true)} className={btnSolid + " flex items-center gap-2"}>
+                <Upload size={16} /> Add New Product
+              </button>
+            </div>
+
+            {productsLoading ? (
+              <Spinner />
+            ) : products.length === 0 ? (
+              <div className="py-20 text-center">
+                <p className="font-cormorant italic text-wb-cream text-2xl opacity-60">
+                  No products yet. Add your first product.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {products.map((product) => (
+                  <div key={product.id} className={`${cardStyle} overflow-hidden flex flex-col`}>
+                    <div className="relative h-48 bg-wb-dark overflow-hidden">
+                      {product.image_url ? (
+                        <>
+                          <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-wb-dark/80 via-transparent to-wb-dark/40" />
+                        </>
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Package size={32} className="text-wb-gold/30" />
+                        </div>
+                      )}
+                      <div className="absolute top-3 left-3 bg-[#1a1917]/90 backdrop-blur-sm border border-[rgba(201,168,76,0.3)] px-2 py-1 rounded text-[10px] uppercase tracking-widest text-wb-gold">
+                        {product.category}
+                      </div>
+                    </div>
+
+                    <div className="p-4 flex flex-col flex-1">
+                      <h3 className="font-cormorant text-xl font-bold text-wb-cream mb-1 truncate">{product.name}</h3>
+                      <p className="text-wb-gold font-bold mb-3">{formatPrice(product.price)}</p>
+                      
+                      <div className="flex gap-2 mb-4">
+                        {product.is_featured && <span className="text-[10px] uppercase tracking-wider bg-wb-gold/10 text-wb-gold px-2 py-0.5 rounded border border-wb-gold/20">Featured</span>}
+                        {!product.is_available && <span className="text-[10px] uppercase tracking-wider bg-[#ef5350]/10 text-[#ef5350] px-2 py-0.5 rounded border border-[#ef5350]/20">Hidden</span>}
+                      </div>
+
+                      <div className="mt-auto grid grid-cols-2 gap-2">
+                        <button onClick={() => {}} className={btnOutlineGold + " flex justify-center items-center gap-1 opacity-50 cursor-not-allowed"} disabled>
+                          <Edit2 size={12} /> Edit
+                        </button>
+                        <button onClick={() => handleDeleteProduct(product)} className={btnOutlineRed + " flex justify-center items-center gap-1"}>
+                          <Trash2 size={12} /> Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Product Modal */}
+            {isProductModalOpen && (
+              <div className="fixed inset-0 bg-wb-dark/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                <div className={`${cardStyle} w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto`}>
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="font-cormorant italic text-3xl text-wb-gold">Add New Product</h2>
+                    <button onClick={closeModal} className="text-wb-cream/60 hover:text-wb-gold transition-colors">
+                      <X size={24} />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleAddProduct} className="space-y-5">
+                    <div>
+                      <label className="block text-xs uppercase tracking-widest text-wb-cream/70 mb-2">Product Name</label>
+                      <input type="text" value={formData.name} onChange={(e) => setFormData(p => ({...p, name: e.target.value}))} className={inputStyle} />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs uppercase tracking-widest text-wb-cream/70 mb-2">Price (Le)</label>
+                        <input type="number" value={formData.price} onChange={(e) => setFormData(p => ({...p, price: e.target.value}))} className={inputStyle} />
+                      </div>
+                      <div>
+                        <label className="block text-xs uppercase tracking-widest text-wb-cream/70 mb-2">Category</label>
+                        <div className="relative">
+                          <select value={formData.category} onChange={(e) => setFormData(p => ({...p, category: e.target.value}))} className={`${inputStyle} appearance-none cursor-pointer`}>
+                            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                          <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-wb-gold/60 pointer-events-none" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs uppercase tracking-widest text-wb-cream/70 mb-2">Image</label>
+                      <div 
+                        className="border-2 border-dashed border-[rgba(201,168,76,0.3)] hover:border-wb-gold transition-colors rounded p-4 text-center cursor-pointer"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                        {imagePreview ? (
+                          <div className="flex flex-col items-center gap-2">
+                            <img src={imagePreview} alt="preview" className="h-24 object-cover rounded border border-[rgba(201,168,76,0.3)]" />
+                            <span className="text-xs text-wb-cream/70">{imageFile?.name}</span>
+                          </div>
+                        ) : (
+                          <div className="text-wb-cream/60 flex flex-col items-center gap-2">
+                            <Upload size={24} className="text-wb-gold/50" />
+                            <span className="text-sm">Click to select image</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-6 py-2">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" checked={formData.is_available} onChange={(e) => setFormData(p => ({...p, is_available: e.target.checked}))} className="accent-wb-gold w-4 h-4" />
+                        <span className="text-sm text-wb-cream">Available</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" checked={formData.is_featured} onChange={(e) => setFormData(p => ({...p, is_featured: e.target.checked}))} className="accent-wb-gold w-4 h-4" />
+                        <span className="text-sm text-wb-cream">Featured</span>
+                      </label>
+                    </div>
+
+                    {formError && <p className="text-[#ef5350] text-sm flex items-center gap-1.5"><AlertCircle size={14}/> {formError}</p>}
+
+                    <div className="flex gap-3 pt-2 border-t border-[rgba(201,168,76,0.1)]">
+                      <button type="button" onClick={closeModal} className="flex-1 border border-wb-cream/20 text-wb-cream hover:bg-wb-cream/10 py-2 rounded font-dm-sans font-bold transition-all">Cancel</button>
+                      <button type="submit" disabled={formLoading} className="flex-1 bg-wb-gold text-wb-dark hover:brightness-110 py-2 rounded font-dm-sans font-bold transition-all disabled:opacity-50 flex justify-center items-center gap-2">
+                        {formLoading ? <div className="w-4 h-4 border-2 border-wb-dark/30 border-t-wb-dark rounded-full animate-spin" /> : "Save Product"}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ════════════════════════════════════════════ TAB: SETTINGS ══ */}
         {activeTab === "settings" && (
-          <div className="max-w-md">
-            <div className="card-base p-6">
-              <h2 className="font-playfair italic text-2xl text-wb-brown mb-1 flex items-center gap-2">
-                <Settings size={20} />
-                Change PIN
-              </h2>
-              <p className="font-lato text-wb-muted text-sm mb-6">
-                Update the 4-digit PIN used to access this dashboard.
-              </p>
+          <div className="flex justify-center pt-8">
+            <div className={`${cardStyle} w-full max-w-md p-8`}>
+              <h2 className="font-cormorant italic text-3xl text-wb-gold mb-6 text-center">Change PIN</h2>
               <ChangePinForm />
             </div>
           </div>
@@ -805,7 +658,6 @@ function ChangePinForm() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // allow only digits, max 4
     const clean = value.replace(/\D/g, "").slice(0, 4);
     setFields((prev) => ({ ...prev, [name]: clean }));
     setError("");
@@ -840,11 +692,12 @@ function ChangePinForm() {
     setFields({ current: "", next: "", confirm: "" });
   };
 
+  const inputClass = "w-full bg-wb-dark border border-[rgba(201,168,76,0.25)] text-wb-cream text-center text-xl tracking-[0.5em] px-3 py-3 rounded focus:border-wb-gold focus:outline-none focus:shadow-[0_0_0_2px_rgba(201,168,76,0.2)] transition-all";
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Current PIN */}
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label className="block font-lato text-xs uppercase tracking-wide text-wb-muted mb-1">
+        <label className="block font-dm-sans text-xs uppercase tracking-widest text-wb-cream/70 mb-2 text-center">
           Current PIN
         </label>
         <input
@@ -855,13 +708,12 @@ function ChangePinForm() {
           placeholder="••••"
           inputMode="numeric"
           maxLength={4}
-          className="w-full bg-wb-bg border border-wb-border text-wb-brown text-center text-xl tracking-widest px-3 py-2.5 rounded focus:border-wb-terra focus:outline-none transition-colors"
+          className={inputClass}
         />
       </div>
 
-      {/* New PIN */}
       <div>
-        <label className="block font-lato text-xs uppercase tracking-wide text-wb-muted mb-1">
+        <label className="block font-dm-sans text-xs uppercase tracking-widest text-wb-cream/70 mb-2 text-center">
           New PIN
         </label>
         <input
@@ -872,13 +724,12 @@ function ChangePinForm() {
           placeholder="••••"
           inputMode="numeric"
           maxLength={4}
-          className="w-full bg-wb-bg border border-wb-border text-wb-brown text-center text-xl tracking-widest px-3 py-2.5 rounded focus:border-wb-terra focus:outline-none transition-colors"
+          className={inputClass}
         />
       </div>
 
-      {/* Confirm New PIN */}
       <div>
-        <label className="block font-lato text-xs uppercase tracking-wide text-wb-muted mb-1">
+        <label className="block font-dm-sans text-xs uppercase tracking-widest text-wb-cream/70 mb-2 text-center">
           Confirm New PIN
         </label>
         <input
@@ -889,27 +740,23 @@ function ChangePinForm() {
           placeholder="••••"
           inputMode="numeric"
           maxLength={4}
-          className="w-full bg-wb-bg border border-wb-border text-wb-brown text-center text-xl tracking-widest px-3 py-2.5 rounded focus:border-wb-terra focus:outline-none transition-colors"
+          className={inputClass}
         />
       </div>
 
-      {/* Error */}
       {error && (
-        <p className="text-red-600 text-sm font-lato flex items-center gap-1">
-          <AlertCircle size={14} />
-          {error}
+        <p className="text-[#ef5350] text-sm font-dm-sans flex items-center justify-center gap-1.5 mt-2">
+          <AlertCircle size={15} /> {error}
         </p>
       )}
 
-      {/* Success */}
       {success && (
-        <p className="text-green-700 text-sm font-lato flex items-center gap-1">
-          <CheckCircle size={14} />
-          {success}
+        <p className="text-[#4caf50] text-sm font-dm-sans flex items-center justify-center gap-1.5 mt-2">
+          <CheckCircle size={15} /> {success}
         </p>
       )}
 
-      <button type="submit" className="btn-primary w-full mt-2">
+      <button type="submit" className="w-full bg-wb-gold text-wb-dark font-dm-sans font-bold uppercase tracking-wider py-3 rounded mt-6 hover:brightness-110 transition-all">
         Save PIN
       </button>
     </form>
