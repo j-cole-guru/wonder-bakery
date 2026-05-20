@@ -13,6 +13,7 @@ import {
   Settings,
   AlertCircle,
   X,
+  Edit2,
 } from "lucide-react";
 
 const isMockMode =
