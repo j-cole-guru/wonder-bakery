@@ -10,6 +10,8 @@ import {
   CheckCircle,
   Clock,
   ChevronDown,
+  Settings,
+  AlertCircle,
 } from "lucide-react";
 
 const isMockMode =
@@ -338,18 +340,13 @@ export function Admin() {
   // ── Render: unlocked ──────────────────────────────────────────────────────────
   return (
     <div className="pt-20 pb-12 min-h-screen bg-wb-dark">
-      <div className="max-w-6xl mx-auto px-4">
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6">
         {/* ── Header ── */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between flex-wrap gap-4 mb-8">
           <div>
-            <h1 className="font-cormorant text-4xl text-wb-gold">
+            <h1 className="font-cormorant text-3xl sm:text-4xl text-wb-gold">
               Admin Dashboard
             </h1>
-            <p className="text-wb-cream/50 text-sm mt-1">
-              {isMockMode
-                ? "⚠ Mock mode — data stored locally"
-                : "● Connected to Supabase"}
-            </p>
           </div>
           <button
             onClick={handleLogout}
@@ -361,10 +358,11 @@ export function Admin() {
         </div>
 
         {/* ── Tabs ── */}
-        <div className="flex gap-1 mb-8 bg-wb-dark-lighter rounded-lg p-1 w-fit">
+        <div className="flex gap-1 mb-8 bg-wb-dark-lighter rounded-lg p-1 w-full sm:w-fit overflow-x-auto">
           {[
             { id: "products", label: "Products", icon: Package },
             { id: "orders", label: "Orders", icon: ShoppingBag },
+            { id: "settings", label: "Settings", icon: Settings },
           ].map(({ id, label, icon: Icon }) => (
             <button
               key={id}
@@ -461,7 +459,7 @@ export function Admin() {
                       Product Image
                     </label>
                     <div
-                      className="relative border-2 border-dashed border-wb-gold/20 rounded overflow-hidden cursor-pointer hover:border-wb-gold/40 transition-colors"
+                      className="relative w-full border-2 border-dashed border-wb-gold/20 rounded overflow-hidden cursor-pointer hover:border-wb-gold/40 transition-colors"
                       style={{ height: "44px" }}
                       onClick={() => fileInputRef.current?.click()}
                     >
@@ -596,7 +594,7 @@ export function Admin() {
         {activeTab === "orders" && (
           <div>
             {/* ── Stats bar ── */}
-            <div className="grid grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-8">
               {[
                 {
                   label: "Total Orders",
@@ -772,7 +770,143 @@ export function Admin() {
             )}
           </div>
         )}
+
+        {/* ════════════════════════════════════════════ TAB: SETTINGS ══ */}
+        {activeTab === "settings" && (
+          <div className="max-w-md">
+            <div className="card-base p-6">
+              <h2 className="font-cormorant text-2xl text-wb-gold mb-1 flex items-center gap-2">
+                <Settings size={20} />
+                Change PIN
+              </h2>
+              <p className="text-wb-cream/50 text-sm mb-6">
+                Update the 4-digit PIN used to access this dashboard.
+              </p>
+              <ChangePinForm />
+            </div>
+          </div>
+        )}
       </div>
     </div>
+  );
+}
+
+// ─── Change PIN Form ──────────────────────────────────────────────────────────
+
+function ChangePinForm() {
+  const [fields, setFields] = useState({ current: "", next: "", confirm: "" });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    // allow only digits, max 4
+    const clean = value.replace(/\D/g, "").slice(0, 4);
+    setFields((prev) => ({ ...prev, [name]: clean }));
+    setError("");
+    setSuccess("");
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    const storedPin =
+      localStorage.getItem("wb_admin_pin") ||
+      import.meta.env.VITE_ADMIN_PIN ||
+      "1234";
+
+    if (fields.current !== storedPin) {
+      setError("Current PIN is incorrect.");
+      return;
+    }
+    if (fields.next.length !== 4) {
+      setError("New PIN must be exactly 4 digits.");
+      return;
+    }
+    if (fields.next !== fields.confirm) {
+      setError("New PIN and Confirm PIN do not match.");
+      return;
+    }
+
+    localStorage.setItem("wb_admin_pin", fields.next);
+    setSuccess("PIN updated successfully.");
+    setFields({ current: "", next: "", confirm: "" });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Current PIN */}
+      <div>
+        <label className="block font-dm-sans text-xs text-wb-cream/80 mb-1">
+          Current PIN
+        </label>
+        <input
+          type="password"
+          name="current"
+          value={fields.current}
+          onChange={handleChange}
+          placeholder="••••"
+          inputMode="numeric"
+          maxLength={4}
+          className="w-full bg-wb-dark border-2 border-wb-gold/30 text-wb-cream text-center text-xl tracking-widest px-3 py-2.5 rounded focus:border-wb-gold focus:outline-none transition-colors"
+        />
+      </div>
+
+      {/* New PIN */}
+      <div>
+        <label className="block font-dm-sans text-xs text-wb-cream/80 mb-1">
+          New PIN
+        </label>
+        <input
+          type="password"
+          name="next"
+          value={fields.next}
+          onChange={handleChange}
+          placeholder="••••"
+          inputMode="numeric"
+          maxLength={4}
+          className="w-full bg-wb-dark border-2 border-wb-gold/30 text-wb-cream text-center text-xl tracking-widest px-3 py-2.5 rounded focus:border-wb-gold focus:outline-none transition-colors"
+        />
+      </div>
+
+      {/* Confirm New PIN */}
+      <div>
+        <label className="block font-dm-sans text-xs text-wb-cream/80 mb-1">
+          Confirm New PIN
+        </label>
+        <input
+          type="password"
+          name="confirm"
+          value={fields.confirm}
+          onChange={handleChange}
+          placeholder="••••"
+          inputMode="numeric"
+          maxLength={4}
+          className="w-full bg-wb-dark border-2 border-wb-gold/30 text-wb-cream text-center text-xl tracking-widest px-3 py-2.5 rounded focus:border-wb-gold focus:outline-none transition-colors"
+        />
+      </div>
+
+      {/* Error */}
+      {error && (
+        <p className="text-red-400 text-sm font-dm-sans flex items-center gap-1">
+          <AlertCircle size={14} />
+          {error}
+        </p>
+      )}
+
+      {/* Success */}
+      {success && (
+        <p className="text-green-400 text-sm font-dm-sans flex items-center gap-1">
+          <CheckCircle size={14} />
+          {success}
+        </p>
+      )}
+
+      <button type="submit" className="btn-primary w-full mt-2">
+        Save PIN
+      </button>
+    </form>
   );
 }

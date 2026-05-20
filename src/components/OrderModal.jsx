@@ -14,7 +14,6 @@ export function OrderModal({ product, onClose }) {
     address: "",
     quantity: 1,
     notes: "",
-    deliveryAddress: "",
     deliveryDate: "",
     deliveryTime: "",
   });
@@ -40,11 +39,8 @@ export function OrderModal({ product, onClose }) {
     if (!formData.fullName.trim()) e.fullName = "Full name is required";
     if (!formData.whatsappNumber.trim())
       e.whatsappNumber = "WhatsApp number is required";
-    if (formData.deliveryType === "delivery" && !formData.address.trim())
-      e.address = "Delivery address is required";
+    if (!formData.address.trim()) e.address = "Delivery address is required";
     if (formData.quantity < 1) e.quantity = "Quantity must be at least 1";
-    if (!formData.deliveryAddress.trim())
-      e.deliveryAddress = "Delivery address is required";
     if (!formData.deliveryDate)
       e.deliveryDate = "Preferred delivery date is required";
     if (!formData.deliveryTime)
@@ -73,8 +69,9 @@ export function OrderModal({ product, onClose }) {
       customer_name: formData.fullName,
       customer_phone: formData.whatsappNumber,
       delivery_type: formData.deliveryType,
-      delivery_address:
-        formData.deliveryType === "delivery" ? formData.address : null,
+      delivery_address: formData.address,
+      delivery_date: formData.deliveryDate,
+      delivery_time: formData.deliveryTime,
       items: [
         {
           name: product.name,
@@ -84,17 +81,14 @@ export function OrderModal({ product, onClose }) {
       ],
       total_amount: total,
       notes: formData.notes || null,
-      customer_delivery_address: formData.deliveryAddress,
-      preferred_delivery_date: formData.deliveryDate,
-      preferred_delivery_time: formData.deliveryTime,
       status: "received",
-      created_at: new Date().toISOString(),
     };
 
     if (!isMockMode) {
+      console.log("Inserting order:", JSON.stringify(orderRow));
       const { error } = await supabase.from("orders").insert(orderRow);
       if (error) {
-        console.error("Order insert error:", error);
+        console.error("Order insert error:", JSON.stringify(error));
         alert("Failed to place order. Please try again.");
         setSubmitting(false);
         return;
@@ -105,39 +99,31 @@ export function OrderModal({ product, onClose }) {
       localStorage.setItem("wb_orders", JSON.stringify(stored));
     }
 
-    const adminPhone = (
-      import.meta.env.VITE_BAKERY_WHATSAPP_NUMBER || "23276000000"
-    ).replace(/\D/g, "");
-    const msg = [
-      `🍰 *NEW ORDER - WONDER BAKERY* 🍰`,
-      `─────────────────────────`,
-      `*Order ID:* ${orderId}`,
-      `*Customer:* ${formData.fullName}`,
-      `*WhatsApp:* ${formData.whatsappNumber}`,
-      `─────────────────────────`,
-      `*Item:* ${product.name}`,
-      `*Qty:* ${formData.quantity}`,
-      `*Total:* Le ${total.toLocaleString()}`,
-      `─────────────────────────`,
-      `*Service:* ${formData.deliveryType === "delivery" ? "Delivery" : "Store Pickup"}`,
-      formData.deliveryType === "delivery"
-        ? `*Location:* ${formData.address}`
-        : "",
-      `*Address:* ${formData.deliveryAddress}`,
-      `*Date:* ${formData.deliveryDate}`,
-      `*Time:* ${formData.deliveryTime}`,
-      formData.notes ? `*Notes:* ${formData.notes}` : "",
-      `─────────────────────────`,
-      `*Payment:* Cash on delivery (physical)`,
-      `Please confirm this order. Thank you! 🙏`,
-    ]
-      .filter(Boolean)
-      .join("\n");
+    const items = [
+      { name: product.name, price: product.price, quantity: formData.quantity },
+    ];
 
-    window.open(
-      `https://wa.me/${adminPhone}?text=${encodeURIComponent(msg)}`,
-      "_blank",
-    );
+    const whatsappMessage = `
+NEW ORDER - WONDER BAKERY
+
+Order ID: ${orderId}
+Customer: ${formData.fullName}
+Phone: ${formData.whatsappNumber}
+Delivery Address: ${formData.address}
+Delivery Date: ${formData.deliveryDate}
+Delivery Time: ${formData.deliveryTime}
+
+Items:
+${items.map((i) => `${i.quantity}x ${i.name} - Le ${(i.price * i.quantity).toLocaleString()}`).join("\n")}
+
+Total: Le ${total.toLocaleString()}
+
+Notes: ${formData.notes || "None"}
+`.trim();
+
+    const whatsappUrl = `https://wa.me/${import.meta.env.VITE_BAKERY_WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappMessage)}`;
+
+    window.open(whatsappUrl, "_blank");
     setSubmitting(false);
     onClose();
   };
@@ -146,7 +132,7 @@ export function OrderModal({ product, onClose }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
       <div className="bg-wb-dark-lighter border-2 border-wb-gold/30 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-wb-gold/20">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-wb-gold/20">
           <div>
             <h2 className="font-cormorant text-xl text-wb-gold">
               Place an Order
@@ -163,7 +149,7 @@ export function OrderModal({ product, onClose }) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4">
           {/* Full Name */}
           <div>
             <label className="block font-dm-sans text-xs text-wb-cream/80 mb-1">
@@ -247,79 +233,64 @@ export function OrderModal({ product, onClose }) {
             </div>
           </div>
 
-          {/* Address — shown only for delivery */}
-          {formData.deliveryType === "delivery" && (
-            <div>
-              <label className="block font-dm-sans text-xs text-wb-cream/80 mb-1">
-                Delivery Location *
-              </label>
-              <textarea
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                placeholder="Enter your delivery address / area"
-                rows="3"
-                className={`w-full bg-wb-dark border-2 text-wb-cream px-3 py-2.5 rounded text-sm focus:outline-none transition-colors resize-none ${errors.address ? "border-red-400" : "border-wb-gold/30 focus:border-wb-gold"}`}
-              />
-              {errors.address && (
-                <p className="text-red-400 text-xs mt-1">{errors.address}</p>
-              )}
-            </div>
-          )}
-
           {/* Delivery Address */}
           <div>
             <label className="block font-dm-sans text-xs text-wb-cream/80 mb-1">
               Delivery Address *
             </label>
             <textarea
-              name="deliveryAddress"
-              value={formData.deliveryAddress}
+              name="address"
+              value={formData.address}
               onChange={handleChange}
               placeholder="Enter your full delivery address"
               rows="3"
-              className={`w-full bg-wb-dark border-2 text-wb-cream px-3 py-2.5 rounded text-sm focus:outline-none transition-colors resize-none ${errors.deliveryAddress ? "border-red-400" : "border-wb-gold/30 focus:border-wb-gold"}`}
+              className={`w-full bg-wb-dark border-2 text-wb-cream px-3 py-2.5 rounded text-sm focus:outline-none transition-colors resize-none ${errors.address ? "border-red-400" : "border-wb-gold/30 focus:border-wb-gold"}`}
             />
-            {errors.deliveryAddress && (
-              <p className="text-red-400 text-xs mt-1">
-                {errors.deliveryAddress}
-              </p>
+            {errors.address && (
+              <p className="text-red-400 text-xs mt-1">{errors.address}</p>
             )}
           </div>
 
-          {/* Preferred Delivery Date */}
-          <div>
-            <label className="block font-dm-sans text-xs text-wb-cream/80 mb-1">
-              Preferred Delivery Date *
-            </label>
-            <input
-              type="date"
-              name="deliveryDate"
-              value={formData.deliveryDate}
-              onChange={handleChange}
-              min={new Date().toISOString().split("T")[0]}
-              className={`w-full bg-wb-dark border-2 text-wb-cream px-3 py-2.5 rounded text-sm focus:outline-none transition-colors ${errors.deliveryDate ? "border-red-400" : "border-wb-gold/30 focus:border-wb-gold"}`}
-            />
-            {errors.deliveryDate && (
-              <p className="text-red-400 text-xs mt-1">{errors.deliveryDate}</p>
-            )}
-          </div>
+          {/* Preferred Delivery Date + Time */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Preferred Delivery Date */}
+            <div>
+              <label className="block font-dm-sans text-xs text-wb-cream/80 mb-1">
+                Preferred Delivery Date *
+              </label>
+              <input
+                type="date"
+                name="deliveryDate"
+                value={formData.deliveryDate}
+                onChange={handleChange}
+                min={new Date().toISOString().split("T")[0]}
+                className={`w-full bg-wb-dark border-2 text-wb-cream px-3 py-2.5 rounded text-sm focus:outline-none transition-colors ${errors.deliveryDate ? "border-red-400" : "border-wb-gold/30 focus:border-wb-gold"}`}
+              />
+              {errors.deliveryDate && (
+                <p className="text-red-400 text-xs mt-1">
+                  {errors.deliveryDate}
+                </p>
+              )}
+            </div>
 
-          {/* Preferred Delivery Time */}
-          <div>
-            <label className="block font-dm-sans text-xs text-wb-cream/80 mb-1">
-              Preferred Delivery Time *
-            </label>
-            <input
-              type="time"
-              name="deliveryTime"
-              value={formData.deliveryTime}
-              onChange={handleChange}
-              className={`w-full bg-wb-dark border-2 text-wb-cream px-3 py-2.5 rounded text-sm focus:outline-none transition-colors ${errors.deliveryTime ? "border-red-400" : "border-wb-gold/30 focus:border-wb-gold"}`}
-            />
-            {errors.deliveryTime && (
-              <p className="text-red-400 text-xs mt-1">{errors.deliveryTime}</p>
-            )}
+            {/* Preferred Delivery Time */}
+            <div>
+              <label className="block font-dm-sans text-xs text-wb-cream/80 mb-1">
+                Preferred Delivery Time *
+              </label>
+              <input
+                type="time"
+                name="deliveryTime"
+                value={formData.deliveryTime}
+                onChange={handleChange}
+                className={`w-full bg-wb-dark border-2 text-wb-cream px-3 py-2.5 rounded text-sm focus:outline-none transition-colors ${errors.deliveryTime ? "border-red-400" : "border-wb-gold/30 focus:border-wb-gold"}`}
+              />
+              {errors.deliveryTime && (
+                <p className="text-red-400 text-xs mt-1">
+                  {errors.deliveryTime}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Notes */}
@@ -347,8 +318,8 @@ export function OrderModal({ product, onClose }) {
 
           {/* Payment note */}
           <div className="text-center text-xs text-wb-cream/50 font-dm-sans">
-            💳 Payment is made physically upon delivery/pickup — no online
-            payment required.
+            Payment is made physically upon delivery/pickup — no online payment
+            required.
           </div>
 
           <button

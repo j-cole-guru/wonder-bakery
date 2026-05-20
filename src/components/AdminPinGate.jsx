@@ -1,36 +1,47 @@
-import React, { useState } from 'react';
-import { AlertCircle } from 'lucide-react';
+import React, { useState } from "react";
+import { AlertCircle } from "lucide-react";
 
 export function AdminPinGate({ onUnlock }) {
-  const [pin, setPin] = useState('');
-  const [error, setError] = useState('');
-  const ADMIN_STORAGE_KEY = 'wb_admin';
-  
-  // Read ADMIN PIN securely from dynamic environment variables
-  const securePin = import.meta.env.VITE_ADMIN_PIN || '1234';
+  const [pin, setPin] = useState("");
+  const [error, setError] = useState("");
+  const ADMIN_STORAGE_KEY = "wb_admin";
+
+  // Check localStorage first, then fall back to env variable
+  const securePin =
+    localStorage.getItem("wb_admin_pin") ||
+    import.meta.env.VITE_ADMIN_PIN ||
+    "1234";
 
   const handlePinInput = (e) => {
     const value = e.target.value.slice(0, 4);
     setPin(value);
-    setError('');
+    setError("");
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (pin === securePin) {
-      localStorage.setItem(ADMIN_STORAGE_KEY, 'true');
+    const storedPin =
+      localStorage.getItem("wb_admin_pin") ||
+      import.meta.env.VITE_ADMIN_PIN ||
+      "1234";
+    if (pin === storedPin) {
+      localStorage.setItem(ADMIN_STORAGE_KEY, "true");
       onUnlock();
     } else {
-      setError('Invalid PIN');
-      setPin('');
+      setError("Invalid PIN");
+      setPin("");
     }
   };
 
   return (
     <div className="fixed inset-0 bg-wb-dark/95 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-wb-dark-lighter border-2 border-wb-gold/30 rounded-lg p-8 w-full max-w-sm">
-        <h2 className="font-cormorant text-2xl text-wb-gold mb-2 text-center">Admin Access</h2>
-        <p className="text-wb-cream/70 text-center text-sm mb-6">Enter 4-digit PIN to continue</p>
+        <h2 className="font-cormorant text-2xl text-wb-gold mb-2 text-center">
+          Admin Access
+        </h2>
+        <p className="text-wb-cream/70 text-center text-sm mb-6">
+          Enter 4-digit PIN to continue
+        </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -51,10 +62,7 @@ export function AdminPinGate({ onUnlock }) {
             )}
           </div>
 
-          <button
-            type="submit"
-            className="btn-primary w-full"
-          >
+          <button type="submit" className="btn-primary w-full">
             Unlock
           </button>
         </form>

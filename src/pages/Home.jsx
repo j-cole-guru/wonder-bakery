@@ -75,7 +75,7 @@ export function Home() {
         <div className="relative z-10 text-center max-w-4xl px-4 md:px-8 animate-fadeIn">
           <div className="mb-6 overflow-hidden">
             <h1
-              className="font-cormorant text-5xl md:text-7xl font-bold text-wb-gold animate-fadeIn"
+              className="font-cormorant text-4xl sm:text-5xl md:text-7xl font-bold text-wb-gold animate-fadeIn"
               style={{ animationDelay: "0.2s" }}
             >
               WONDER BAKERY
@@ -126,13 +126,13 @@ export function Home() {
       {/* Featured Products Section */}
       <section className="section-container">
         <div className="text-center mb-12">
-          <h2 className="font-cormorant text-4xl md:text-5xl text-wb-cream mb-3">
+          <h2 className="font-cormorant text-3xl sm:text-4xl md:text-5xl text-wb-cream mb-3">
             Featured Selection
           </h2>
           <div className="w-16 h-0.5 bg-wb-gold mx-auto"></div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
           {featuredProducts.map((product) => (
             <ProductCard
               key={product.id}
@@ -151,7 +151,7 @@ export function Home() {
             <p className="font-dm-sans text-xs text-wb-gold uppercase tracking-widest mb-3">
               Wilkinson Road, Cockerill Junction · Freetown, Sierra Leone
             </p>
-            <h2 className="font-cormorant text-4xl text-wb-cream mb-2">
+            <h2 className="font-cormorant text-3xl md:text-4xl text-wb-cream mb-2">
               Crafted with <span className="text-wb-gold">Love</span>
             </h2>
             <p className="font-dm-sans text-wb-gold/80 italic text-sm mb-5">
@@ -208,16 +208,11 @@ export function Home() {
 
           {/* Logo / Image */}
           <div className="flex flex-col items-center gap-6">
-            <div className="aspect-square w-64 md:w-72 overflow-hidden rounded-full border-4 border-wb-gold/40 hover:border-wb-gold transition-colors bg-white flex items-center justify-center p-4">
+            <div className="aspect-square w-48 sm:w-56 md:w-72 overflow-hidden rounded-full border-4 border-wb-gold/40 hover:border-wb-gold transition-colors bg-white flex items-center justify-center p-4">
               <img
-                src="https://scontent.ffna1-2.fna.fbcdn.net/v/t39.30808-1/p200x200/wonder_bakery_logo.jpg"
+                src="/logo.svg"
                 alt="Wonder Bakery Logo"
                 className="w-full h-full object-contain"
-                onError={(e) => {
-                  e.target.src =
-                    "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=500";
-                  e.target.className = "w-full h-full object-cover";
-                }}
               />
             </div>
             {/* Contact info card */}
@@ -252,7 +247,7 @@ export function Home() {
       {/* Testimonials Section */}
       <section id="testimonials" className="section-container">
         <div className="text-center mb-12">
-          <h2 className="font-cormorant text-4xl md:text-5xl text-wb-cream mb-3">
+          <h2 className="font-cormorant text-3xl sm:text-4xl md:text-5xl text-wb-cream mb-3">
             Love from Our Customers
           </h2>
           <div className="w-16 h-0.5 bg-wb-gold mx-auto"></div>
@@ -326,7 +321,7 @@ export function Home() {
           <div className="w-16 h-0.5 bg-wb-gold mx-auto"></div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 auto-rows-max">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 auto-rows-max">
           {galleryImages.map((image, index) => (
             <div
               key={index}

@@ -32,7 +32,7 @@ export function Menu() {
     <div className="bg-wb-dark min-h-screen pt-24 pb-12">
       <div className="section-container">
         <div className="text-center mb-12">
-          <h1 className="font-cormorant text-5xl md:text-6xl text-wb-cream mb-3">
+          <h1 className="font-cormorant text-4xl sm:text-5xl md:text-6xl text-wb-cream mb-3">
             Our Menu
           </h1>
           <p className="font-dm-sans text-wb-cream/70 text-lg">
@@ -42,7 +42,7 @@ export function Menu() {
 
         {/* Search Bar */}
         <div className="mb-12">
-          <div className="relative max-w-md">
+          <div className="relative w-full max-w-md">
             <Search
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-wb-gold/50"
               size={20}
@@ -82,7 +82,7 @@ export function Menu() {
             <div className="w-12 h-12 rounded-full border-2 border-wb-gold border-t-transparent animate-spin"></div>
           </div>
         ) : filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredProducts.map((product) => (
               <ProductCard
                 key={product.id}

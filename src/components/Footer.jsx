@@ -59,9 +59,9 @@ export function Footer() {
   return (
     <footer className="bg-wb-dark-lighter pt-16 pb-8 border-t border-wb-gold/20">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 mb-12">
           {/* Brand Column */}
-          <div className="md:col-span-1">
+          <div className="sm:col-span-2 md:col-span-1">
             <h3 className="font-cormorant text-2xl text-wb-gold mb-1">
               WONDER BAKERY
             </h3>
