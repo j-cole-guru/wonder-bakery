@@ -7,6 +7,11 @@ module.exports = {
         "wb-gold": "#c9a84c",
         "wb-cream": "#f5f0e8",
         "wb-dark-lighter": "#1a1815",
+        "wb-terra": "#d2691e",
+        "wb-brown": "#3e2723",
+        "wb-muted": "#8d6e63",
+        "wb-bg": "#fffbf0",
+        "wb-border": "#d7ccc8",
       },
       fontFamily: {
         cormorant: ["Cormorant Garamond", "serif"],

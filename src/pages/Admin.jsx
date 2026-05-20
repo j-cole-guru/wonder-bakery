@@ -87,11 +87,9 @@ export function Admin() {
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
 
-  // ── Unlock check on mount ────────────────────────────────────────────────────
+  // ── Always require PIN on every visit ─────────────────────────────────────
   useEffect(() => {
-    if (localStorage.getItem(ADMIN_KEY) === "true") {
-      setIsUnlocked(true);
-    }
+    localStorage.removeItem(ADMIN_KEY);
   }, []);
 
   // ── Load data when tab changes (and on unlock) ───────────────────────────────
