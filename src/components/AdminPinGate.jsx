@@ -6,12 +6,6 @@ export function AdminPinGate({ onUnlock }) {
   const [error, setError] = useState("");
   const ADMIN_STORAGE_KEY = "wb_admin";
 
-  // Check localStorage first, then fall back to env variable
-  const securePin =
-    localStorage.getItem("wb_admin_pin") ||
-    import.meta.env.VITE_ADMIN_PIN ||
-    "1234";
-
   const handlePinInput = (e) => {
     const value = e.target.value.slice(0, 4);
     setPin(value);
@@ -39,10 +33,9 @@ export function AdminPinGate({ onUnlock }) {
         <h2 className="font-cormorant text-2xl text-wb-gold mb-2 text-center">
           Admin Access
         </h2>
-        <p className="text-wb-cream/70 text-center text-sm mb-6">
+        <p className="text-wb-cream/70 text-center text-sm mb-6 font-dm-sans">
           Enter 4-digit PIN to continue
         </p>
-
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <input
@@ -55,19 +48,17 @@ export function AdminPinGate({ onUnlock }) {
               className="w-full bg-wb-dark border-2 border-wb-gold/30 text-wb-cream text-center text-3xl tracking-widest py-4 rounded focus:border-wb-gold focus:outline-none transition-colors"
             />
             {error && (
-              <div className="flex items-center gap-2 mt-3 text-red-400 text-sm">
+              <div className="flex items-center gap-2 mt-3 text-red-400 text-sm font-dm-sans">
                 <AlertCircle size={16} />
                 {error}
               </div>
             )}
           </div>
-
           <button type="submit" className="btn-primary w-full">
             Unlock
           </button>
         </form>
-
-        <p className="text-wb-cream/40 text-xs text-center mt-6">
+        <p className="text-wb-cream/40 text-xs text-center mt-6 font-dm-sans">
           Admin PIN required for dashboard access
         </p>
       </div>

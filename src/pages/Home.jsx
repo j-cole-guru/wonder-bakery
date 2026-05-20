@@ -35,9 +35,7 @@ export function Home() {
   ];
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -66,12 +64,8 @@ export function Home() {
     <div className="bg-wb-dark">
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-        {/* Grain Texture Overlay */}
         <div className="absolute inset-0 grain opacity-20"></div>
-
-        {/* Background Gradient */}
         <div className="absolute inset-0 bg-gradient-radial from-wb-gold/5 to-transparent"></div>
-
         <div className="relative z-10 text-center max-w-4xl px-4 md:px-8 animate-fadeIn">
           <div className="mb-6 overflow-hidden">
             <h1
@@ -81,7 +75,6 @@ export function Home() {
               WONDER BAKERY
             </h1>
           </div>
-
           <p
             className="font-dm-sans text-xl md:text-2xl text-wb-cream mb-2 animate-fadeIn"
             style={{ animationDelay: "0.4s" }}
@@ -95,7 +88,6 @@ export function Home() {
             <MapPin size={13} className="inline" />
             Wilkinson Road, Cockerill Junction, Freetown, Sierra Leone
           </p>
-
           <div
             className="flex flex-col sm:flex-row gap-4 justify-center animate-fadeIn"
             style={{ animationDelay: "0.6s" }}
@@ -105,8 +97,9 @@ export function Home() {
             </button>
             <button
               onClick={() => {
-                const element = document.getElementById("about");
-                element?.scrollIntoView({ behavior: "smooth" });
+                document
+                  .getElementById("about")
+                  ?.scrollIntoView({ behavior: "smooth" });
               }}
               className="btn-secondary"
             >
@@ -114,8 +107,6 @@ export function Home() {
             </button>
           </div>
         </div>
-
-        {/* Scroll Indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
           <div className="w-6 h-10 border-2 border-wb-gold rounded-full flex items-start justify-center p-2">
             <div className="w-1 h-2 bg-wb-gold rounded-full animate-bounce"></div>
@@ -131,7 +122,6 @@ export function Home() {
           </h2>
           <div className="w-16 h-0.5 bg-wb-gold mx-auto"></div>
         </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
           {featuredProducts.map((product) => (
             <ProductCard
@@ -146,7 +136,6 @@ export function Home() {
       {/* Our Story Section */}
       <section id="about" className="section-container bg-wb-dark-lighter">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          {/* Text */}
           <div className="animate-fadeIn">
             <p className="font-dm-sans text-xs text-wb-gold uppercase tracking-widest mb-3">
               Wilkinson Road, Cockerill Junction · Freetown, Sierra Leone
@@ -170,8 +159,6 @@ export function Home() {
               cakes, elegant wedding tiers, cupcakes, parfaits, spring rolls,
               samosas, puff-puff, food trays and so much more.
             </p>
-
-            {/* Services tags */}
             <div className="flex flex-wrap gap-2 mb-6">
               {[
                 "Birthday Cakes",
@@ -190,7 +177,6 @@ export function Home() {
                 </span>
               ))}
             </div>
-
             <div className="flex gap-3 flex-wrap">
               <button onClick={() => navigate("/menu")} className="btn-primary">
                 Order Now
@@ -206,7 +192,6 @@ export function Home() {
             </div>
           </div>
 
-          {/* Logo / Image */}
           <div className="flex flex-col items-center gap-6">
             <div className="aspect-square w-48 sm:w-56 md:w-72 overflow-hidden rounded-full border-4 border-wb-gold/40 hover:border-wb-gold transition-colors bg-white flex items-center justify-center p-4">
               <img
@@ -215,7 +200,6 @@ export function Home() {
                 className="w-full h-full object-contain"
               />
             </div>
-            {/* Contact info card */}
             <div className="bg-wb-dark border border-wb-gold/20 rounded-lg px-6 py-4 w-full max-w-xs space-y-3">
               <div className="flex items-start gap-3 text-sm font-dm-sans text-wb-cream/70">
                 <MapPin
@@ -252,7 +236,6 @@ export function Home() {
           </h2>
           <div className="w-16 h-0.5 bg-wb-gold mx-auto"></div>
         </div>
-
         <div className="max-w-2xl mx-auto">
           {testimonials.length > 0 ? (
             <div className="bg-wb-dark-lighter border-2 border-wb-gold/30 rounded-lg p-8 md:p-12 animate-fadeIn">
@@ -278,8 +261,6 @@ export function Home() {
               Loading reviews...
             </div>
           )}
-
-          {/* Navigation */}
           {testimonials.length > 0 && (
             <div className="flex justify-center gap-4 mt-8">
               <button
@@ -293,11 +274,7 @@ export function Home() {
                   <button
                     key={i}
                     onClick={() => setTestimonialIndex(i)}
-                    className={`w-2 h-2 rounded-full transition-all ${
-                      i === testimonialIndex
-                        ? "bg-wb-gold w-6"
-                        : "bg-wb-gold/30"
-                    }`}
+                    className={`w-2 h-2 rounded-full transition-all ${i === testimonialIndex ? "bg-wb-gold w-6" : "bg-wb-gold/30"}`}
                   />
                 ))}
               </div>
@@ -315,19 +292,16 @@ export function Home() {
       {/* Gallery Section */}
       <section className="section-container">
         <div className="text-center mb-12">
-          <h2 className="font-cormorant text-4xl md:text-5xl text-wb-cream mb-3">
+          <h2 className="font-cormorant text-3xl sm:text-4xl md:text-5xl text-wb-cream mb-3">
             Gallery
           </h2>
           <div className="w-16 h-0.5 bg-wb-gold mx-auto"></div>
         </div>
-
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 auto-rows-max">
           {galleryImages.map((image, index) => (
             <div
               key={index}
-              className={`overflow-hidden rounded-lg border border-wb-gold/20 hover:border-wb-gold transition-all hover:scale-105 ${
-                index === 2 || index === 5 ? "md:row-span-2 md:col-span-1" : ""
-              }`}
+              className={`overflow-hidden rounded-lg border border-wb-gold/20 hover:border-wb-gold transition-all hover:scale-105 ${index === 2 || index === 5 ? "md:row-span-2 md:col-span-1" : ""}`}
             >
               <img
                 src={image}

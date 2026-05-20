@@ -23,15 +23,12 @@ export function Navbar() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
-        {/* Logo */}
         <Link
           to="/"
           className="font-cormorant text-2xl font-bold text-wb-gold hover:text-wb-cream transition-colors"
         >
           WONDER
         </Link>
-
-        {/* Desktop Menu */}
         <div className="hidden md:flex gap-8 items-center">
           <Link
             to="/"
@@ -46,20 +43,18 @@ export function Navbar() {
             Menu
           </Link>
           <a
-            href="#about"
+            href="/#about"
             className="text-wb-cream hover:text-wb-gold transition-colors font-dm-sans"
           >
             About
           </a>
           <a
-            href="#testimonials"
+            href="/#testimonials"
             className="text-wb-cream hover:text-wb-gold transition-colors font-dm-sans"
           >
             Reviews
           </a>
         </div>
-
-        {/* Mobile Menu Button */}
         <button
           className="md:hidden p-2 text-wb-cream hover:text-wb-gold transition-colors"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -68,8 +63,6 @@ export function Navbar() {
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
-
-      {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="md:hidden bg-wb-dark-lighter border-t border-wb-gold/20 animate-slideIn">
           <div className="flex flex-col gap-4 px-4 py-4">
@@ -88,14 +81,14 @@ export function Navbar() {
               Menu
             </Link>
             <a
-              href="#about"
+              href="/#about"
               className="text-wb-cream hover:text-wb-gold transition-colors font-dm-sans"
               onClick={() => setIsMenuOpen(false)}
             >
               About
             </a>
             <a
-              href="#testimonials"
+              href="/#testimonials"
               className="text-wb-cream hover:text-wb-gold transition-colors font-dm-sans"
               onClick={() => setIsMenuOpen(false)}
             >

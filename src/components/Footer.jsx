@@ -63,12 +63,12 @@ export function Footer() {
           {/* Brand Column */}
           <div className="sm:col-span-2 md:col-span-1">
             <h3 className="font-cormorant text-2xl text-wb-gold mb-1">
-              WONDER BAKERY
+              Wonder Bakery
             </h3>
-            <p className="text-wb-gold/70 font-dm-sans text-xs italic mb-3">
+            <p className="font-dm-sans text-xs italic text-wb-gold/70 mb-3">
               "Taste the grace in every embrace"
             </p>
-            <p className="text-wb-cream/60 font-dm-sans text-sm leading-relaxed">
+            <p className="font-dm-sans text-sm text-wb-cream/60 leading-relaxed">
               Freetown's go-to bakery for custom cakes, small chops, catering
               and so much more — made with love on every occasion.
             </p>
@@ -100,7 +100,7 @@ export function Footer() {
             <h4 className="font-cormorant text-lg text-wb-gold mb-4">
               What We Offer
             </h4>
-            <ul className="space-y-2 font-dm-sans text-sm text-wb-cream/70">
+            <ul className="space-y-2">
               {[
                 "Custom Birthday Cakes",
                 "Wedding & Engagement Cakes",
@@ -110,7 +110,10 @@ export function Footer() {
                 "Food Trays (Party & Family)",
                 "Full Catering Services",
               ].map((item) => (
-                <li key={item} className="flex items-center gap-2">
+                <li
+                  key={item}
+                  className="font-dm-sans text-sm text-wb-cream/70 flex items-center gap-2"
+                >
                   <ChevronRight
                     size={12}
                     className="text-wb-gold flex-shrink-0"
@@ -126,11 +129,11 @@ export function Footer() {
             <h4 className="font-cormorant text-lg text-wb-gold mb-4">
               Quick Links
             </h4>
-            <ul className="space-y-2 font-dm-sans text-sm">
+            <ul className="space-y-2">
               <li>
                 <Link
                   to="/"
-                  className="text-wb-cream/70 hover:text-wb-gold transition-colors"
+                  className="text-wb-cream/70 hover:text-wb-gold transition-colors font-dm-sans text-sm"
                 >
                   Home
                 </Link>
@@ -138,7 +141,7 @@ export function Footer() {
               <li>
                 <Link
                   to="/menu"
-                  className="text-wb-cream/70 hover:text-wb-gold transition-colors"
+                  className="text-wb-cream/70 hover:text-wb-gold transition-colors font-dm-sans text-sm"
                 >
                   Our Menu
                 </Link>
@@ -148,7 +151,7 @@ export function Footer() {
                   href="https://www.facebook.com/share/1AE1U55R2y/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-wb-cream/70 hover:text-wb-gold transition-colors"
+                  className="text-wb-cream/70 hover:text-wb-gold transition-colors font-dm-sans text-sm"
                 >
                   Facebook Page
                 </a>
@@ -158,7 +161,7 @@ export function Footer() {
                   href={`https://wa.me/${whatsappNumber}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-wb-cream/70 hover:text-wb-gold transition-colors"
+                  className="text-wb-cream/70 hover:text-wb-gold transition-colors font-dm-sans text-sm"
                 >
                   Order via WhatsApp
                 </a>
@@ -171,8 +174,8 @@ export function Footer() {
             <h4 className="font-cormorant text-lg text-wb-gold mb-4">
               Find Us
             </h4>
-            <div className="space-y-4 text-sm font-dm-sans">
-              <div className="flex gap-2 text-wb-cream/70">
+            <div className="space-y-4">
+              <div className="flex gap-2 font-dm-sans text-sm text-wb-cream/70">
                 <MapPin
                   size={16}
                   className="text-wb-gold flex-shrink-0 mt-0.5"
@@ -183,14 +186,14 @@ export function Footer() {
                   Freetown, Sierra Leone
                 </p>
               </div>
-              <div className="flex gap-2 text-wb-cream/70">
+              <div className="flex gap-2 font-dm-sans text-sm text-wb-cream/70">
                 <Clock
                   size={16}
                   className="text-wb-gold flex-shrink-0 mt-0.5"
                 />
                 <p>Always Open</p>
               </div>
-              <div className="flex gap-2 text-wb-cream/70">
+              <div className="flex gap-2 font-dm-sans text-sm text-wb-cream/70">
                 <Phone
                   size={16}
                   className="text-wb-gold flex-shrink-0 mt-0.5"

@@ -161,7 +161,7 @@ Notes: ${formData.notes || "None"}
               value={formData.fullName}
               onChange={handleChange}
               placeholder="Your full name"
-              className={`w-full bg-wb-dark border-2 text-wb-cream px-3 py-2.5 rounded text-sm focus:outline-none transition-colors ${errors.fullName ? "border-red-400" : "border-wb-gold/30 focus:border-wb-gold"}`}
+              className={`w-full bg-wb-dark border-2 text-wb-cream px-3 py-2.5 rounded text-sm focus:outline-none transition-colors placeholder:text-wb-cream/30 ${errors.fullName ? "border-red-400" : "border-wb-gold/30 focus:border-wb-gold"}`}
             />
             {errors.fullName && (
               <p className="text-red-400 text-xs mt-1">{errors.fullName}</p>
@@ -179,7 +179,7 @@ Notes: ${formData.notes || "None"}
               value={formData.whatsappNumber}
               onChange={handleChange}
               placeholder="076 XXX XXXX"
-              className={`w-full bg-wb-dark border-2 text-wb-cream px-3 py-2.5 rounded text-sm focus:outline-none transition-colors ${errors.whatsappNumber ? "border-red-400" : "border-wb-gold/30 focus:border-wb-gold"}`}
+              className={`w-full bg-wb-dark border-2 text-wb-cream px-3 py-2.5 rounded text-sm focus:outline-none transition-colors placeholder:text-wb-cream/30 ${errors.whatsappNumber ? "border-red-400" : "border-wb-gold/30 focus:border-wb-gold"}`}
             />
             {errors.whatsappNumber && (
               <p className="text-red-400 text-xs mt-1">
@@ -244,16 +244,15 @@ Notes: ${formData.notes || "None"}
               onChange={handleChange}
               placeholder="Enter your full delivery address"
               rows="3"
-              className={`w-full bg-wb-dark border-2 text-wb-cream px-3 py-2.5 rounded text-sm focus:outline-none transition-colors resize-none ${errors.address ? "border-red-400" : "border-wb-gold/30 focus:border-wb-gold"}`}
+              className={`w-full bg-wb-dark border-2 text-wb-cream px-3 py-2.5 rounded text-sm focus:outline-none transition-colors resize-none placeholder:text-wb-cream/30 ${errors.address ? "border-red-400" : "border-wb-gold/30 focus:border-wb-gold"}`}
             />
             {errors.address && (
               <p className="text-red-400 text-xs mt-1">{errors.address}</p>
             )}
           </div>
 
-          {/* Preferred Delivery Date + Time */}
+          {/* Date + Time grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Preferred Delivery Date */}
             <div>
               <label className="block font-dm-sans text-xs text-wb-cream/80 mb-1">
                 Preferred Delivery Date *
@@ -272,8 +271,6 @@ Notes: ${formData.notes || "None"}
                 </p>
               )}
             </div>
-
-            {/* Preferred Delivery Time */}
             <div>
               <label className="block font-dm-sans text-xs text-wb-cream/80 mb-1">
                 Preferred Delivery Time *
@@ -304,7 +301,7 @@ Notes: ${formData.notes || "None"}
               onChange={handleChange}
               placeholder="Any special requests or instructions..."
               rows="2"
-              className="w-full bg-wb-dark border-2 border-wb-gold/30 text-wb-cream px-3 py-2.5 rounded text-sm focus:outline-none focus:border-wb-gold transition-colors resize-none"
+              className="w-full bg-wb-dark border-2 border-wb-gold/30 text-wb-cream px-3 py-2.5 rounded text-sm focus:outline-none focus:border-wb-gold transition-colors resize-none placeholder:text-wb-cream/30"
             />
           </div>
 

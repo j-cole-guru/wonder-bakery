@@ -30,25 +30,25 @@ function StatusBadge({ status }) {
   const map = {
     received: {
       label: "Received",
-      classes: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+      classes: "bg-yellow-500/20 text-yellow-700 border-yellow-400/50",
     },
     preparing: {
       label: "Preparing",
-      classes: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+      classes: "bg-blue-500/20 text-blue-700 border-blue-400/50",
     },
     ready: {
       label: "Ready",
-      classes: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+      classes: "bg-purple-500/20 text-purple-700 border-purple-400/50",
     },
     delivered: {
       label: "Delivered",
-      classes: "bg-green-500/20 text-green-400 border-green-500/30",
+      classes: "bg-green-500/20 text-green-700 border-green-400/50",
     },
   };
   const s = map[status] || map.received;
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${s.classes}`}
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-lato text-xs uppercase tracking-wide border ${s.classes}`}
     >
       {s.label}
     </span>
@@ -58,7 +58,7 @@ function StatusBadge({ status }) {
 function Spinner() {
   return (
     <div className="flex items-center justify-center py-16">
-      <div className="w-10 h-10 border-4 border-wb-gold/20 border-t-wb-gold rounded-full animate-spin" />
+      <div className="spinner-terra" />
     </div>
   );
 }
@@ -339,18 +339,18 @@ export function Admin() {
 
   // ── Render: unlocked ──────────────────────────────────────────────────────────
   return (
-    <div className="pt-20 pb-12 min-h-screen bg-wb-dark">
+    <div className="pt-20 pb-12 min-h-screen bg-wb-bg">
       <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6">
         {/* ── Header ── */}
         <div className="flex items-center justify-between flex-wrap gap-4 mb-8">
           <div>
-            <h1 className="font-cormorant text-3xl sm:text-4xl text-wb-gold">
+            <h1 className="font-playfair italic text-3xl sm:text-4xl text-wb-brown">
               Admin Dashboard
             </h1>
           </div>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 rounded border border-wb-gold/30 text-wb-cream/70 hover:text-wb-gold hover:border-wb-gold transition-colors text-sm"
+            className="flex items-center gap-2 px-4 py-2 rounded border border-wb-border text-wb-muted hover:text-wb-terra hover:border-wb-terra transition-colors text-sm font-lato"
           >
             <LogOut size={16} />
             Logout
@@ -358,7 +358,7 @@ export function Admin() {
         </div>
 
         {/* ── Tabs ── */}
-        <div className="flex gap-1 mb-8 bg-wb-dark-lighter rounded-lg p-1 w-full sm:w-fit overflow-x-auto">
+        <div className="flex gap-1 mb-8 bg-wb-cream border border-wb-border rounded p-1 w-full sm:w-fit overflow-x-auto">
           {[
             { id: "products", label: "Products", icon: Package },
             { id: "orders", label: "Orders", icon: ShoppingBag },
@@ -367,10 +367,10 @@ export function Admin() {
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-medium transition-all ${
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-md transition-all ${
                 activeTab === id
-                  ? "bg-wb-gold text-wb-dark font-semibold"
-                  : "text-wb-cream/60 hover:text-wb-cream"
+                  ? "bg-wb-terra text-wb-cream font-lato font-bold text-xs uppercase tracking-wider"
+                  : "text-wb-muted hover:text-wb-brown font-lato text-xs uppercase tracking-wider"
               }`}
             >
               <Icon size={16} />
@@ -384,7 +384,7 @@ export function Admin() {
           <div>
             {/* ── Add Product Form ── */}
             <div className="card-base mb-8">
-              <h2 className="font-cormorant text-2xl text-wb-gold mb-6 flex items-center gap-2">
+              <h2 className="font-playfair italic text-2xl text-wb-brown mb-6 flex items-center gap-2">
                 <Upload size={20} />
                 Add New Product
               </h2>
@@ -393,7 +393,7 @@ export function Admin() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   {/* Name */}
                   <div>
-                    <label className="block text-wb-cream/70 text-sm mb-1.5">
+                    <label className="block text-wb-muted text-xs uppercase tracking-wide font-lato mb-1.5">
                       Product Name
                     </label>
                     <input
@@ -403,13 +403,13 @@ export function Admin() {
                       onChange={(e) =>
                         setFormData((p) => ({ ...p, name: e.target.value }))
                       }
-                      className="w-full bg-wb-dark border border-wb-gold/20 rounded px-3 py-2.5 text-wb-cream placeholder-wb-cream/30 focus:border-wb-gold focus:outline-none transition-colors"
+                      className="w-full bg-wb-bg border border-wb-border rounded px-3 py-2.5 text-wb-brown font-lato text-sm placeholder-wb-muted/50 focus:border-wb-terra focus:outline-none transition-colors"
                     />
                   </div>
 
                   {/* Price */}
                   <div>
-                    <label className="block text-wb-cream/70 text-sm mb-1.5">
+                    <label className="block text-wb-muted text-xs uppercase tracking-wide font-lato mb-1.5">
                       Price in Le
                     </label>
                     <input
@@ -420,13 +420,13 @@ export function Admin() {
                       onChange={(e) =>
                         setFormData((p) => ({ ...p, price: e.target.value }))
                       }
-                      className="w-full bg-wb-dark border border-wb-gold/20 rounded px-3 py-2.5 text-wb-cream placeholder-wb-cream/30 focus:border-wb-gold focus:outline-none transition-colors"
+                      className="w-full bg-wb-bg border border-wb-border rounded px-3 py-2.5 text-wb-brown font-lato text-sm placeholder-wb-muted/50 focus:border-wb-terra focus:outline-none transition-colors"
                     />
                   </div>
 
                   {/* Category */}
                   <div>
-                    <label className="block text-wb-cream/70 text-sm mb-1.5">
+                    <label className="block text-wb-muted text-xs uppercase tracking-wide font-lato mb-1.5">
                       Category
                     </label>
                     <div className="relative">
@@ -438,7 +438,7 @@ export function Admin() {
                             category: e.target.value,
                           }))
                         }
-                        className="w-full appearance-none bg-wb-dark border border-wb-gold/20 rounded px-3 py-2.5 text-wb-cream focus:border-wb-gold focus:outline-none transition-colors"
+                        className="w-full appearance-none bg-wb-bg border border-wb-border rounded px-3 py-2.5 text-wb-brown font-lato text-sm focus:border-wb-terra focus:outline-none transition-colors"
                       >
                         {CATEGORIES.map((c) => (
                           <option key={c} value={c}>
@@ -448,18 +448,18 @@ export function Admin() {
                       </select>
                       <ChevronDown
                         size={16}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-wb-cream/40 pointer-events-none"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-wb-muted/60 pointer-events-none"
                       />
                     </div>
                   </div>
 
                   {/* Image */}
                   <div>
-                    <label className="block text-wb-cream/70 text-sm mb-1.5">
+                    <label className="block text-wb-muted text-xs uppercase tracking-wide font-lato mb-1.5">
                       Product Image
                     </label>
                     <div
-                      className="relative w-full border-2 border-dashed border-wb-gold/20 rounded overflow-hidden cursor-pointer hover:border-wb-gold/40 transition-colors"
+                      className="relative w-full border-2 border-dashed border-wb-border rounded overflow-hidden cursor-pointer hover:border-wb-terra transition-colors"
                       style={{ height: "44px" }}
                       onClick={() => fileInputRef.current?.click()}
                     >
@@ -477,12 +477,12 @@ export function Admin() {
                             alt="preview"
                             className="h-8 w-8 object-cover rounded"
                           />
-                          <span className="text-wb-cream/70 text-sm truncate">
+                          <span className="text-wb-muted text-sm truncate">
                             {imageFile?.name}
                           </span>
                         </div>
                       ) : (
-                        <div className="flex items-center gap-2 px-3 h-full text-wb-cream/40 text-sm">
+                        <div className="flex items-center gap-2 px-3 h-full text-wb-muted text-sm">
                           <Upload size={15} />
                           Click to choose image
                         </div>
@@ -492,7 +492,7 @@ export function Admin() {
                 </div>
 
                 {formError && (
-                  <p className="text-red-400 text-sm">{formError}</p>
+                  <p className="text-red-600 text-sm font-lato">{formError}</p>
                 )}
 
                 <div className="flex items-center gap-4">
@@ -518,7 +518,7 @@ export function Admin() {
                       <button
                         type="button"
                         onClick={resetForm}
-                        className="text-wb-cream/50 hover:text-wb-cream text-sm transition-colors"
+                        className="text-wb-muted hover:text-wb-terra transition-colors text-sm font-lato"
                       >
                         Clear
                       </button>
@@ -528,7 +528,7 @@ export function Admin() {
             </div>
 
             {/* ── Products List ── */}
-            <h2 className="font-cormorant text-2xl text-wb-gold mb-4">
+            <h2 className="font-playfair italic text-2xl text-wb-brown mb-4">
               Products ({products.length})
             </h2>
 
@@ -536,8 +536,8 @@ export function Admin() {
               <Spinner />
             ) : products.length === 0 ? (
               <div className="card-base text-center py-16">
-                <Package size={48} className="mx-auto text-wb-gold/20 mb-4" />
-                <p className="text-wb-cream/40">
+                <Package size={48} className="mx-auto text-wb-terra/30 mb-4" />
+                <p className="font-lato text-wb-muted">
                   No products yet. Add your first product above.
                 </p>
               </div>
@@ -546,10 +546,10 @@ export function Admin() {
                 {products.map((product) => (
                   <div
                     key={product.id}
-                    className="card-base p-0 overflow-hidden group"
+                    className="bg-wb-cream border border-wb-border rounded overflow-hidden hover:shadow-warm transition-all group"
                   >
                     {/* Image */}
-                    <div className="aspect-square bg-wb-dark-lighter overflow-hidden">
+                    <div className="aspect-square bg-wb-bg overflow-hidden">
                       {product.image_url ? (
                         <img
                           src={product.image_url}
@@ -558,26 +558,26 @@ export function Admin() {
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Package size={32} className="text-wb-gold/20" />
+                          <Package size={32} className="text-wb-terra/20" />
                         </div>
                       )}
                     </div>
 
                     {/* Info */}
                     <div className="p-3">
-                      <p className="text-wb-cream font-medium text-sm truncate">
+                      <p className="font-playfair text-wb-brown text-sm font-medium truncate">
                         {product.name}
                       </p>
-                      <p className="text-wb-gold text-sm font-semibold mt-0.5">
+                      <p className="font-lato font-bold text-wb-terra text-sm mt-0.5">
                         {formatPrice(product.price)}
                       </p>
-                      <p className="text-wb-cream/40 text-xs mt-0.5">
+                      <p className="font-lato text-[10px] uppercase tracking-widest text-wb-terra mt-0.5">
                         {product.category}
                       </p>
 
                       <button
                         onClick={() => handleDeleteProduct(product)}
-                        className="mt-3 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 text-red-400 text-xs transition-colors"
+                        className="mt-3 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 text-red-500 hover:text-red-700 text-xs transition-colors"
                       >
                         <Trash2 size={12} />
                         Delete
@@ -599,24 +599,27 @@ export function Admin() {
                 {
                   label: "Total Orders",
                   value: totalOrders,
-                  color: "text-wb-gold",
+                  color: "text-wb-terra",
                 },
                 {
                   label: "Delivered",
                   value: deliveredCount,
-                  color: "text-green-400",
+                  color: "text-green-700",
                 },
                 {
                   label: "Pending",
                   value: pendingCount,
-                  color: "text-yellow-400",
+                  color: "text-wb-brown",
                 },
               ].map(({ label, value, color }) => (
-                <div key={label} className="card-base text-center py-5">
-                  <p className={`text-3xl font-cormorant font-bold ${color}`}>
-                    {value}
+                <div
+                  key={label}
+                  className="bg-wb-cream border border-wb-border rounded p-4 text-center"
+                >
+                  <p className="font-lato text-xs uppercase tracking-wide text-wb-muted mb-1">
+                    {label}
                   </p>
-                  <p className="text-wb-cream/50 text-sm mt-1">{label}</p>
+                  <p className={`font-playfair text-2xl ${color}`}>{value}</p>
                 </div>
               ))}
             </div>
@@ -628,9 +631,9 @@ export function Admin() {
               <div className="card-base text-center py-16">
                 <ShoppingBag
                   size={48}
-                  className="mx-auto text-wb-gold/20 mb-4"
+                  className="mx-auto text-wb-terra/30 mb-4"
                 />
-                <p className="text-wb-cream/40">No orders yet.</p>
+                <p className="font-lato text-wb-muted">No orders yet.</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -650,7 +653,7 @@ export function Admin() {
                   return (
                     <div
                       key={order.id}
-                      className={`card-base transition-all ${isDelivered ? "opacity-60" : ""}`}
+                      className={`bg-wb-cream border border-wb-border rounded-lg p-4 sm:p-5 transition-all ${isDelivered ? "opacity-60" : ""}`}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                         {/* ── Left: order info ── */}
@@ -659,17 +662,17 @@ export function Admin() {
                             {isDelivered && (
                               <CheckCircle
                                 size={16}
-                                className="text-green-400 shrink-0"
+                                className="text-green-700 shrink-0"
                               />
                             )}
-                            <span className="text-wb-cream/40 text-xs font-mono">
+                            <span className="font-lato text-xs text-wb-muted font-mono">
                               #
                               {typeof order.id === "string"
                                 ? order.id.slice(0, 8).toUpperCase()
                                 : order.id}
                             </span>
                             <StatusBadge status={order.status} />
-                            <span className="text-wb-cream/30 text-xs flex items-center gap-1">
+                            <span className="font-lato text-wb-muted/60 text-xs flex items-center gap-1">
                               <Clock size={11} />
                               {dateStr}
                             </span>
@@ -677,11 +680,11 @@ export function Admin() {
 
                           {/* Customer */}
                           <div className="mb-2">
-                            <span className="text-wb-cream font-medium">
+                            <span className="font-playfair text-wb-brown font-medium">
                               {order.customer_name || "Unknown"}
                             </span>
                             {order.customer_phone && (
-                              <span className="text-wb-cream/50 text-sm ml-2">
+                              <span className="font-lato text-wb-muted text-sm ml-2">
                                 {order.customer_phone}
                               </span>
                             )}
@@ -693,7 +696,7 @@ export function Admin() {
                               {items.map((item, i) => (
                                 <span
                                   key={i}
-                                  className="inline-block bg-wb-dark px-2 py-0.5 rounded text-xs text-wb-cream/60 border border-wb-gold/10"
+                                  className="inline-block bg-wb-bg border border-wb-border px-2 py-0.5 rounded font-lato text-xs text-wb-muted"
                                 >
                                   {item.quantity}× {item.name}
                                 </span>
@@ -703,34 +706,38 @@ export function Admin() {
 
                           {/* Delivery info */}
                           {order.delivery_type && (
-                            <p className="text-wb-cream/40 text-xs capitalize">
+                            <p className="font-lato text-wb-muted text-xs capitalize">
                               {order.delivery_type === "delivery"
                                 ? "Delivery"
                                 : "Pickup"}
                             </p>
                           )}
                           {order.delivery_address && (
-                            <p className="text-wb-cream/40 text-xs">
+                            <p className="font-lato text-wb-muted text-xs">
                               {order.delivery_address}
                             </p>
                           )}
                           {order.customer_delivery_address && (
-                            <p className="text-wb-cream/40 text-xs">
-                              <span className="text-wb-cream/30">
+                            <p className="font-lato text-wb-muted text-xs">
+                              <span className="text-wb-muted/60 font-lato">
                                 Address:{" "}
                               </span>
                               {order.customer_delivery_address}
                             </p>
                           )}
                           {order.preferred_delivery_date && (
-                            <p className="text-wb-cream/40 text-xs">
-                              <span className="text-wb-cream/30">Date: </span>
+                            <p className="font-lato text-wb-muted text-xs">
+                              <span className="text-wb-muted/60 font-lato">
+                                Date:{" "}
+                              </span>
                               {order.preferred_delivery_date}
                             </p>
                           )}
                           {order.preferred_delivery_time && (
-                            <p className="text-wb-cream/40 text-xs">
-                              <span className="text-wb-cream/30">Time: </span>
+                            <p className="font-lato text-wb-muted text-xs">
+                              <span className="text-wb-muted/60 font-lato">
+                                Time:{" "}
+                              </span>
                               {order.preferred_delivery_time}
                             </p>
                           )}
@@ -738,7 +745,7 @@ export function Admin() {
 
                         {/* ── Right: price + action ── */}
                         <div className="flex flex-row sm:flex-col items-center sm:items-end gap-3 shrink-0">
-                          <p className="text-wb-gold font-cormorant text-xl font-bold">
+                          <p className="font-playfair text-wb-terra text-xl font-medium">
                             {formatPrice(order.total_amount || 0)}
                           </p>
 
@@ -753,10 +760,10 @@ export function Admin() {
                               checked={isDelivered}
                               disabled={isDelivered}
                               onChange={() => handleMarkDelivered(order)}
-                              className="w-4 h-4 accent-green-500 cursor-pointer disabled:cursor-default"
+                              className="w-4 h-4 accent-green-700 cursor-pointer disabled:cursor-default"
                             />
                             <span
-                              className={`text-xs ${isDelivered ? "text-green-400" : "text-wb-cream/50"}`}
+                              className={`text-xs font-lato ${isDelivered ? "text-green-700" : "text-wb-muted"}`}
                             >
                               {isDelivered ? "Delivered ✓" : "Mark Delivered"}
                             </span>
@@ -775,11 +782,11 @@ export function Admin() {
         {activeTab === "settings" && (
           <div className="max-w-md">
             <div className="card-base p-6">
-              <h2 className="font-cormorant text-2xl text-wb-gold mb-1 flex items-center gap-2">
+              <h2 className="font-playfair italic text-2xl text-wb-brown mb-1 flex items-center gap-2">
                 <Settings size={20} />
                 Change PIN
               </h2>
-              <p className="text-wb-cream/50 text-sm mb-6">
+              <p className="font-lato text-wb-muted text-sm mb-6">
                 Update the 4-digit PIN used to access this dashboard.
               </p>
               <ChangePinForm />
@@ -839,7 +846,7 @@ function ChangePinForm() {
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Current PIN */}
       <div>
-        <label className="block font-dm-sans text-xs text-wb-cream/80 mb-1">
+        <label className="block font-lato text-xs uppercase tracking-wide text-wb-muted mb-1">
           Current PIN
         </label>
         <input
@@ -850,13 +857,13 @@ function ChangePinForm() {
           placeholder="••••"
           inputMode="numeric"
           maxLength={4}
-          className="w-full bg-wb-dark border-2 border-wb-gold/30 text-wb-cream text-center text-xl tracking-widest px-3 py-2.5 rounded focus:border-wb-gold focus:outline-none transition-colors"
+          className="w-full bg-wb-bg border border-wb-border text-wb-brown text-center text-xl tracking-widest px-3 py-2.5 rounded focus:border-wb-terra focus:outline-none transition-colors"
         />
       </div>
 
       {/* New PIN */}
       <div>
-        <label className="block font-dm-sans text-xs text-wb-cream/80 mb-1">
+        <label className="block font-lato text-xs uppercase tracking-wide text-wb-muted mb-1">
           New PIN
         </label>
         <input
@@ -867,13 +874,13 @@ function ChangePinForm() {
           placeholder="••••"
           inputMode="numeric"
           maxLength={4}
-          className="w-full bg-wb-dark border-2 border-wb-gold/30 text-wb-cream text-center text-xl tracking-widest px-3 py-2.5 rounded focus:border-wb-gold focus:outline-none transition-colors"
+          className="w-full bg-wb-bg border border-wb-border text-wb-brown text-center text-xl tracking-widest px-3 py-2.5 rounded focus:border-wb-terra focus:outline-none transition-colors"
         />
       </div>
 
       {/* Confirm New PIN */}
       <div>
-        <label className="block font-dm-sans text-xs text-wb-cream/80 mb-1">
+        <label className="block font-lato text-xs uppercase tracking-wide text-wb-muted mb-1">
           Confirm New PIN
         </label>
         <input
@@ -884,13 +891,13 @@ function ChangePinForm() {
           placeholder="••••"
           inputMode="numeric"
           maxLength={4}
-          className="w-full bg-wb-dark border-2 border-wb-gold/30 text-wb-cream text-center text-xl tracking-widest px-3 py-2.5 rounded focus:border-wb-gold focus:outline-none transition-colors"
+          className="w-full bg-wb-bg border border-wb-border text-wb-brown text-center text-xl tracking-widest px-3 py-2.5 rounded focus:border-wb-terra focus:outline-none transition-colors"
         />
       </div>
 
       {/* Error */}
       {error && (
-        <p className="text-red-400 text-sm font-dm-sans flex items-center gap-1">
+        <p className="text-red-600 text-sm font-lato flex items-center gap-1">
           <AlertCircle size={14} />
           {error}
         </p>
@@ -898,7 +905,7 @@ function ChangePinForm() {
 
       {/* Success */}
       {success && (
-        <p className="text-green-400 text-sm font-dm-sans flex items-center gap-1">
+        <p className="text-green-700 text-sm font-lato flex items-center gap-1">
           <CheckCircle size={14} />
           {success}
         </p>
